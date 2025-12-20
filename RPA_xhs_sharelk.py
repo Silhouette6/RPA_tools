@@ -144,14 +144,15 @@ def get_xhs_info(url, xpaths, wait_list, save_dir, download_img = True):
         status = poll_until_ready(page=page, close_btn=close_btn, locators=locators, wait_list=wait_list)
         
         if status == "ALL_READY":
-            title = locators["title"].first.inner_text()
-            author = locators["author"].first.inner_text()
-            try:
-                content_loc = locators["content"].first
-                content_loc.wait_for(state="visible", timeout=500)
-                content = content_loc.inner_text()
-            except:
-                 content = ""
+            def safe_get_text(key):
+                try:
+                    return locators[key].first.inner_text()
+                except Exception:
+                    return None
+
+            title = safe_get_text("title")
+            author = safe_get_text("author")
+            content = safe_get_text("content")
             
             result = json.dumps({
                 "code": 200,
@@ -162,10 +163,10 @@ def get_xhs_info(url, xpaths, wait_list, save_dir, download_img = True):
                         "title": title, 
                         "content": content,
                         "author": author, 
-                        "likes": locators["likes"].first.inner_text(), 
-                        "favours": locators["favours"].first.inner_text(),
-                        "comments": locators["comments"].first.inner_text(), 
-                        "publish_time": locators["publish_time"].first.inner_text(),
+                        "likes": safe_get_text("likes"), 
+                        "favours": safe_get_text("favours"),
+                        "comments": safe_get_text("comments"), 
+                        "publish_time": safe_get_text("publish_time"),
                         "url_long": page.url
                         }
             }, ensure_ascii=False)

@@ -115,8 +115,14 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = True):
             status = poll_until_ready(page=page, locators=locators, wait_list=w_wait_list)
         
             if status == "ALL_READY":
-                content = locators["w_content"].first.inner_text()
-                author = locators["w_author"].first.inner_text()
+                def safe_get_text(key):
+                    try:
+                        return locators[key].first.inner_text()
+                    except Exception:
+                        return None
+
+                content = safe_get_text("w_content")
+                author = safe_get_text("w_author")
                 result = json.dumps({
                     "code": 200,
                     "message": "success",
@@ -125,8 +131,8 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = True):
                             "status": "200",
                             "content": content, 
                             "author": author, 
-                            "likes": locators["w_likes"].first.inner_text(), 
-                            "publish_time": locators["w_publish_time"].first.inner_text(),
+                            "likes": safe_get_text("w_likes"), 
+                            "publish_time": safe_get_text("w_publish_time"),
                             "url_long": page.url
                             }
                 }, ensure_ascii=False)
@@ -167,8 +173,14 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = True):
             status = poll_until_ready(page=page, locators=locators, wait_list=video_wait_list)
         
             if status == "ALL_READY":
-                content = locators["video_content"].first.inner_text()
-                author = locators["video_author"].first.inner_text()    
+                def safe_get_text(key):
+                    try:
+                        return locators[key].first.inner_text()
+                    except Exception:
+                        return None
+
+                content = safe_get_text("video_content")
+                author = safe_get_text("video_author")    
                 result = json.dumps({
                     "code": 200,
                     "message": "success",
@@ -177,9 +189,9 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = True):
                             "status": "200",
                             "content": content, 
                             "author": author, 
-                            "views": locators["video_views"].first.inner_text(), 
-                            "likes": locators["video_likes"].first.inner_text(), 
-                            "publish_time": locators["video_publish_time"].first.inner_text(),
+                            "views": safe_get_text("video_views"), 
+                            "likes": safe_get_text("video_likes"), 
+                            "publish_time": safe_get_text("video_publish_time"),
                             "url_long": page.url
                             }
                 }, ensure_ascii=False)

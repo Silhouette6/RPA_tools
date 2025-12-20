@@ -88,6 +88,7 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
 
         print(f"Opening {url} ...")
         page.goto(url, wait_until="domcontentloaded")
+        print(page.url)
 
         close_btn = page.locator(xpaths["close_btn"])
         # 统一构建locator
@@ -97,8 +98,15 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
         status = poll_until_ready(page=page, close_btn=close_btn, locators=locators, wait_list=wait_list)
         
         if status == "ALL_READY":
-            title = locators["title"].first.inner_text()
-            author = locators["author"].first.inner_text()
+            def safe_get_text(key):
+                """安全获取元素文本，处理可能的异常"""
+                try:
+                    return locators[key].first.inner_text()
+                except Exception:
+                    return None
+
+            title = safe_get_text("title")
+            author = safe_get_text("author")
             result = json.dumps({
                 "code": 200,
                 "message": "success",
@@ -107,11 +115,11 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                         "status": "200",
                         "title": title, 
                         "author": author, 
-                        "likes": locators["likes"].first.inner_text(), 
-                        "comments": locators["comments"].first.inner_text(), 
-                        "shares": locators["shares"].first.inner_text(), 
-                        "fans": locators["fans"].first.inner_text(),
-                        "publish_time": locators["publish_time"].first.inner_text(),
+                        "likes": safe_get_text("likes"), 
+                        "comments": safe_get_text("comments"), 
+                        "shares": safe_get_text("shares"), 
+                        "fans": safe_get_text("fans"),
+                        "publish_time": safe_get_text("publish_time"),
                         "url_long": page.url
                         }
             }, ensure_ascii=False)

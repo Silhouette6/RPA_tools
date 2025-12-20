@@ -1,9 +1,8 @@
 class Config_Douyin:
     def __init__(self):
-        self.url = "https://www.iesdouyin.com/share/video/7568635678734328811"
         self.xpaths = {
-            "author": '//*[@id="douyin-right-container"]/div[2]/div/div/div[2]/div/div[1]/div[2]/a/div/span/span/span/span/span/span',
-            "title": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[1]/div/h1/span/span[2]/span/span[1]/span/span/span',
+            "author": '//div[@data-e2e="video-detail"]/div/div/div/div/a/div[@data-click-from="title"]/span/span/span/span/span/span',
+            "title": '//*[local-name()="h1"]/span/span/span/span/span/span/span',
             "likes": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[1]/span',
             "comments": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[2]/span',
             "shares": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[4]/span',
@@ -12,7 +11,7 @@ class Config_Douyin:
             "video": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[2]/div/div[1]/xg-video-container/video/source[1]',
             "close_btn": '//article/div/div/div/*[local-name()="svg"]'
             }
-        self.wait_list = ["title"]
+        self.wait_list = ["title", "author", "likes", "comments", "shares", "fans", "publish_time"]
         self.save_dir = "data/douyin"
 
 class Config_Xhs:
