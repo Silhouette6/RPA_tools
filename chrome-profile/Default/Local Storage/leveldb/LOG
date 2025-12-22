@@ -1,14 +1,3 @@
-2025/12/22-10:52:16.594 7290 Reusing MANIFEST d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Local Storage\leveldb/MANIFEST-000001
-2025/12/22-10:52:16.597 7290 Recovering log #30
-2025/12/22-10:52:16.598 7290 Level-0 table #33: started
-2025/12/22-10:52:16.642 7290 Level-0 table #33: 42876 bytes OK
-2025/12/22-10:52:16.708 7290 Delete type=0 #30
-2025/12/22-10:52:16.709 8578 Compacting 4@0 + 1@1 files
-2025/12/22-10:52:16.791 8578 Generated table #35@0: 91 keys, 61090 bytes
-2025/12/22-10:52:16.791 8578 Compacted 4@0 + 1@1 files => 61090 bytes
-2025/12/22-10:52:16.816 8578 compacted to: files[ 0 1 0 0 0 0 0 ]
-2025/12/22-10:52:16.817 8578 Delete type=2 #22
-2025/12/22-10:52:16.817 8578 Delete type=2 #24
-2025/12/22-10:52:16.817 8578 Delete type=2 #27
-2025/12/22-10:52:16.837 8578 Delete type=2 #31
-2025/12/22-10:52:16.837 8578 Delete type=2 #33
+2025/12/22-13:58:16.447 9090 Reusing MANIFEST d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Local Storage\leveldb/MANIFEST-000001
+2025/12/22-13:58:16.451 9090 Recovering log #60
+2025/12/22-13:58:16.452 9090 Reusing old log d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Local Storage\leveldb/000060.log 

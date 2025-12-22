@@ -37,7 +37,43 @@ def close_login_popup(close_btn):
         print(f"close login popup cost time: {end_time - start_time}")
         pass
      
+def download(page, save_dir, title, author, close_btn ,locator_video = None):
+
     
+    if locator_video:
+        # 路径保护与文件名合法性处理
+        save_path = f"{save_dir}/{title}-{author}.mp4"
+        path_obj = Path(save_path)
+        directory = path_obj.parent
+        # 对文件名（不含后缀）进行合法性审查并重新拼接
+        safe_name = f"{safe_filename(path_obj.stem)}{path_obj.suffix}"
+        safe_save_path = str(directory / safe_name)
+        close_login_popup(close_btn)
+        video_url = locator_video.get_attribute("src")
+        print('下载视频中...')   
+        
+        # 确保目录存在（路径保护）
+        directory.mkdir(parents=True, exist_ok=True)
+
+        response = page.request.get(video_url)
+        with open(safe_save_path, "wb") as f:
+            f.write(response.body()) 
+        print(f"视频已保存至: {safe_save_path}")
+    else:
+        # ===== 兜底策略：截屏 （处理note）=====
+        
+        # 路径保护与文件名合法性处理
+        save_path = f"{save_dir}/{title}-{author}.jpg"
+        path_obj = Path(save_path)
+        directory = path_obj.parent
+        # 对文件名（不含后缀）进行合法性审查并重新拼接
+        safe_name = f"{safe_filename(path_obj.stem)}{path_obj.suffix}"
+        safe_save_path = str(directory / safe_name)
+        print(f"解析视频失败，采用截屏策略保存至 {safe_save_path}")
+        
+        close_login_popup(close_btn)
+        time.sleep(0.3)
+        page.screenshot(path=safe_save_path)
 
 def poll_until_ready(
     page,
@@ -102,12 +138,15 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
         print(page.url)
 
         if "douyin.com/video" in page.url:
-            close_btn = page.locator(xpaths["close_btn"])
+            video_xpaths = xpaths["video_xpaths"]
+            video_wait_list = wait_list["video_wait_list"]
+
+            close_btn = page.locator(video_xpaths["video_close_btn"])
             # 统一构建locator
-            locators = {k: page.locator(v) for k, v in xpaths.items()}
+            locators = {k: page.locator(v) for k, v in video_xpaths.items()}
 
             # 3️⃣ 等待正文就绪
-            status = poll_until_ready(page=page, close_btn=close_btn, locators=locators, wait_list=wait_list)
+            status = poll_until_ready(page=page, close_btn=close_btn, locators=locators, wait_list=video_wait_list)
             
             if status == "ALL_READY":
                 def safe_get_text(key):
@@ -141,8 +180,8 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                             print(f"warning: {key} 耗时 {time.time() - start_time} 秒，且进入了异常处理（是否因为该元素不存在？）")
                         return None
 
-                title = safe_get_text("title")
-                author = safe_get_text("author")
+                title = safe_get_text("video_title")
+                author = safe_get_text("video_author")
                 result = json.dumps({
                     "code": 200,
                     "message": "success",
@@ -151,11 +190,11 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                             "status": "200",
                             "title": title, 
                             "author": author, 
-                            "likes": safe_get_text("likes"), 
-                            "comments": safe_get_text("comments"), 
-                            "shares": safe_get_text("shares"), 
-                            "fans": safe_get_text("fans"),
-                            "publish_time": safe_get_text("publish_time"),
+                            "likes": safe_get_text("video_likes"), 
+                            "comments": safe_get_text("video_comments"), 
+                            "shares": safe_get_text("video_shares"), 
+                            "fans": safe_get_text("video_fans"),
+                            "publish_time": safe_get_text("video_publish_time"),
                             "url_long": page.url
                             }
                 }, ensure_ascii=False)
@@ -188,33 +227,18 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
             
             # 尝试下载视频
             if status == "ALL_READY" and download_video:
-                close_login_popup(close_btn)
-                video_url = locators["video"].get_attribute("src")
-                print('下载视频中...')   
-                
-                # 路径保护与文件名合法性处理
-                save_path = f"{save_dir}/{title}-{author}.mp4"
-                path_obj = Path(save_path)
-                directory = path_obj.parent
-                # 对文件名（不含后缀）进行合法性审查并重新拼接
-                safe_name = f"{safe_filename(path_obj.stem)}{path_obj.suffix}"
-                safe_save_path = str(directory / safe_name)
-                
-                # 确保目录存在（路径保护）
-                directory.mkdir(parents=True, exist_ok=True)
-
-                response = page.request.get(video_url)
-                with open(safe_save_path, "wb") as f:
-                    f.write(response.body()) 
-                print(f"视频已保存至: {safe_save_path}")
+                download(page=page, save_dir=save_dir, title=title, author=author, close_btn=close_btn, locator_video=locators["video_video"])
         
         if "douyin.com/note" in page.url:
-            close_btn = page.locator(xpaths["close_btn"])
+            note_xpaths = xpaths["note_xpaths"]
+            note_wait_list = wait_list["note_wait_list"]
+
+            close_btn = page.locator(note_xpaths["note_close_btn"])
             # 统一构建locator
-            locators = {k: page.locator(v) for k, v in xpaths.items()}
+            locators = {k: page.locator(v) for k, v in note_xpaths.items()}
 
             # 3️⃣ 等待正文就绪
-            status = poll_until_ready(page=page, close_btn=close_btn, locators=locators, wait_list=wait_list)
+            status = poll_until_ready(page=page, close_btn=close_btn, locators=locators, wait_list=note_wait_list)
             
             if status == "ALL_READY":
                 def safe_get_text(key):
@@ -248,8 +272,8 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                             print(f"warning: {key} 耗时 {time.time() - start_time} 秒，且进入了异常处理（是否因为该元素不存在？）")
                         return None
 
-                title = safe_get_text("title")
-                author = safe_get_text("author")
+                title = safe_get_text("note_title")
+                author = safe_get_text("note_author")
                 result = json.dumps({
                     "code": 200,
                     "message": "success",
@@ -258,15 +282,17 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                             "status": "200",
                             "title": title, 
                             "author": author, 
-                            "likes": safe_get_text("likes"), 
-                            "comments": safe_get_text("comments"), 
-                            "shares": safe_get_text("shares"), 
-                            "fans": safe_get_text("fans"),
-                            "publish_time": safe_get_text("publish_time"),
+                            "likes": safe_get_text("note_likes"), 
+                            "comments": safe_get_text("note_comments"), 
+                            "favorites": safe_get_text("note_favorites"),
+                            "shares": safe_get_text("note_shares"), 
+                            "fans": safe_get_text("note_fans"),
+                            "publish_time": safe_get_text("note_publish_time"),
                             "url_long": page.url
                             }
                 }, ensure_ascii=False)
-            
+                # print(result)
+
             elif status == "PAGE_NOT_FOUND":
                 result = json.dumps({
                     "code": 200,
@@ -295,25 +321,7 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
             
             # 尝试下载视频
             if status == "ALL_READY" and download_video:
-                close_login_popup(close_btn)
-                video_url = locators["video"].get_attribute("src")
-                print('下载视频中...')   
-                
-                # 路径保护与文件名合法性处理
-                save_path = f"{save_dir}/{title}-{author}.mp4"
-                path_obj = Path(save_path)
-                directory = path_obj.parent
-                # 对文件名（不含后缀）进行合法性审查并重新拼接
-                safe_name = f"{safe_filename(path_obj.stem)}{path_obj.suffix}"
-                safe_save_path = str(directory / safe_name)
-                
-                # 确保目录存在（路径保护）
-                directory.mkdir(parents=True, exist_ok=True)
-
-                response = page.request.get(video_url)
-                with open(safe_save_path, "wb") as f:
-                    f.write(response.body()) 
-                print(f"视频已保存至: {safe_save_path}")
+                download(page=page, save_dir=save_dir, title=title, author=author, close_btn=close_btn, locator_video = None)
 
         return result
 
@@ -323,8 +331,8 @@ if __name__ == "__main__":
     # https://v.douyin.com/WogUSRW-pzM/ 短链接
     # https://www.iesdouyin.com/share/video/7568635678734328811 长link
 
-    # https://www.douyin.com/video/7566611297145290425?7566674254713979675
-    url = "https://www.iesdouyin.com/share/video/7568635678734328811"
+    
+    url = "http://xhslink.com/o/6sk7iUPYhxj"
     
     config = Config_Douyin() 
     # XPath路径

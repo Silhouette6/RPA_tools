@@ -1,18 +1,33 @@
 class Config_Douyin:
     def __init__(self):
         self.xpaths = {
-            "author": '//div[@data-e2e="video-detail"]/div/div/div/div/a/div[@data-click-from="title"]/span/span/span/span/span/span',
-            "title": '//*[local-name()="h1"]/span/span/span/span/span/span/span',
-            "title_bak1": '//span[3]/span[1]/span[1]/span[1]',
-            "likes": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[1]/span',
-            "comments": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[2]/span',
-            "shares": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[4]/span',
-            "fans": '//*[@id="douyin-right-container"]/div[2]/div/div/div[2]/div/div[1]/div[2]/p/span[2]',
-            "publish_time": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[2]/span',
-            "video": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[2]/div/div[1]/xg-video-container/video/source[1]',
-            "close_btn": '//article/div/div/div/*[local-name()="svg"]'
+            "video_xpaths" : {
+                "video_author": '//div[@data-e2e="video-detail"]/div/div/div/div/a/div[@data-click-from="title"]/span/span/span/span/span/span',
+                "video_title": '//*[local-name()="h1"]/span/span/span/span/span/span/span',
+                "video_likes": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[1]/span',
+                "video_comments": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[2]/span',
+                "video_shares": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[1]/div[4]/span',
+                "video_fans": '//*[@id="douyin-right-container"]/div[2]/div/div/div[2]/div/div[1]/div[2]/p/span[2]',
+                "video_publish_time": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[3]/div/div[2]/div[2]/span',
+                "video_video": '//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[2]/div/div[1]/xg-video-container/video/source[1]',
+                "video_close_btn": '//article/div/div/div/*[local-name()="svg"]'
+                },
+            "note_xpaths" : {
+                "note_title": '//span[3]/span[1]/span[1]/span[1]',
+                "note_author": '//*[@id="douyin-right-container"]/div[2]/main/div[2]/div[1]/div[2]/a/div/span/span/span/span/span/span',
+                "note_likes": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]/div[2]/div[1]/div[1]/div/div[2]',
+                "note_comments": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]/div[2]/div[1]/div[2]/div/div[2]',
+                "note_favourites": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]/div[2]/div[1]/div[3]/div[2]',
+                "note_shares": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]/div[2]/div[1]/div[4]/div/div[2]',
+                "note_fans": '//*[@id="douyin-right-container"]/div[2]/main/div[2]/div[1]/div[2]/p/span[2]',
+                "note_publish_time": '//*[@id="douyin-right-container"]/div[2]/main/div[2]/div[2]/div/div[2]/span',
+                "note_close_btn": '//article/div/div/div/*[local-name()="svg"]'
             }
-        self.wait_list = ["author", "likes", "comments", "shares", "fans", "publish_time"]
+        }
+        self.wait_list = {
+            "video_wait_list": ["video_author", "video_likes", "video_comments", "video_shares", "video_fans", "video_publish_time"],
+            "note_wait_list": ["note_title"],
+        }
         self.save_dir = "data/douyin"
 
 class Config_Xhs:

@@ -258,7 +258,7 @@ if __name__ == "__main__":
     # https://www.toutiao.com/video/7523088690436898851/#ocr 视频
     # https://www.toutiao.com/video/7571580926610636841/ 视频2
     # https://www.toutiao.com/video/7571303297971060770/#ocr 视频已下架
-    url = "https://www.toutiao.com/video/7523088690436898851/#ocr"
+    url = "https://www.toutiao.com/w/1850641232900096/"
     
     config = Config_Toutiao() 
     # XPath路径

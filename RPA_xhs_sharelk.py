@@ -258,7 +258,7 @@ if __name__ == "__main__":
     # http://xhslink.com/o/3C2UqEN1jIz 已下架
     # https://www.xiaohongshu.com/discovery/item/6911a4c30000000004005418 移动端扫码链接
     
-    url = "http://xhslink.com/o/3C2UqEN1jIz"
+    url = "http://xhslink.com/o/6sk7iUPYhxj"
     
     config = Config_Xhs()
 
