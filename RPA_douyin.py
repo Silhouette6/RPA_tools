@@ -1,3 +1,4 @@
+import re
 from playwright.sync_api import sync_playwright
 from pathlib import Path
 import time
@@ -12,6 +13,16 @@ TODO
 www.douyin.com
 www.iesdouyin.com
 """
+
+def safe_filename(name, max_len=100):
+    """
+    文件名合法性审查
+    """
+    name = re.sub(r'[\\/:*?"<>|]', "_", name)
+    name = name.strip()
+    if not name:
+        name = "unnamed"
+    return name[:max_len]
 
 def close_login_popup(close_btn):
     start_time = time.time()
@@ -90,75 +101,220 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
         page.goto(url, wait_until="domcontentloaded")
         print(page.url)
 
-        close_btn = page.locator(xpaths["close_btn"])
-        # 统一构建locator
-        locators = {k: page.locator(v) for k, v in xpaths.items()}
+        if "douyin.com/video" in page.url:
+            close_btn = page.locator(xpaths["close_btn"])
+            # 统一构建locator
+            locators = {k: page.locator(v) for k, v in xpaths.items()}
 
-        # 3️⃣ 等待正文就绪
-        status = poll_until_ready(page=page, close_btn=close_btn, locators=locators, wait_list=wait_list)
-        
-        if status == "ALL_READY":
-            def safe_get_text(key):
-                """安全获取元素文本，处理可能的异常"""
-                try:
-                    return locators[key].first.inner_text()
-                except Exception:
-                    return None
+            # 3️⃣ 等待正文就绪
+            status = poll_until_ready(page=page, close_btn=close_btn, locators=locators, wait_list=wait_list)
+            
+            if status == "ALL_READY":
+                def safe_get_text(key):
+                    """
+                    安全获取元素文本，处理可能的异常
+                    """
 
-            title = safe_get_text("title")
-            author = safe_get_text("author")
-            result = json.dumps({
-                "code": 200,
-                "message": "success",
-                "data": {
-                        "source": "抖音",
-                        "status": "200",
-                        "title": title, 
-                        "author": author, 
-                        "likes": safe_get_text("likes"), 
-                        "comments": safe_get_text("comments"), 
-                        "shares": safe_get_text("shares"), 
-                        "fans": safe_get_text("fans"),
-                        "publish_time": safe_get_text("publish_time"),
-                        "url_long": page.url
-                        }
-            }, ensure_ascii=False)
-        
-        elif status == "PAGE_NOT_FOUND":
-            result = json.dumps({
-                "code": 200,
-                "message": "PAGE_NOT_FOUND已下架",
-                "data": {
-                        "source": "抖音",
-                        "status": "PAGE_NOT_FOUND",
-                        "message": "检查到作品已下架"
-                        }
-            }, ensure_ascii=False)
-            return result
+                    start_time = time.time()
+                    try:
+                        r = locators[key].first.inner_text(timeout=1000)
+                        if time.time() - start_time > 0.5:
+                            print(f"warning: {key} 耗时 {time.time() - start_time} 秒")
+                        return r
+                    except Exception:
+                        '''
+                        # example: title 元素排版有时候很怪出现异常，导致获取失败，这里添加异常处理
+                        if key == "title":
+                            try:
+                                r = locators["title_bak1"].first.inner_text(timeout=1000)
+                                if time.time() - start_time > 0.5:
+                                    print(f"warning: {key} 耗时 {time.time() - start_time} 秒")
+                                return r
+                            except Exception:
+                                if time.time() - start_time > 0.5:
+                                    print(f"error: {key} 耗时 {time.time() - start_time} 秒，title_bak1也不存在，获取title失败")
+                                return None
 
-        else:
-            result = json.dumps({
-                "code": 400,
-                "message": "400未找到对应元素，请检查路径或页面加载状态。",
-                "data": {
-                        "source": "抖音",
-                        "status": "400",
-                        "message": "未找到对应元素，请检查路径或页面加载状态。",
-                        "url_long": page.url
-                        }
-            }, ensure_ascii=False)
-            print("未找到对应元素，请检查路径或页面加载状态。")
-            return result
+                        else:
+                            '''
+                        if time.time() - start_time > 0.5:
+                            print(f"warning: {key} 耗时 {time.time() - start_time} 秒，且进入了异常处理（是否因为该元素不存在？）")
+                        return None
+
+                title = safe_get_text("title")
+                author = safe_get_text("author")
+                result = json.dumps({
+                    "code": 200,
+                    "message": "success",
+                    "data": {
+                            "source": "抖音",
+                            "status": "200",
+                            "title": title, 
+                            "author": author, 
+                            "likes": safe_get_text("likes"), 
+                            "comments": safe_get_text("comments"), 
+                            "shares": safe_get_text("shares"), 
+                            "fans": safe_get_text("fans"),
+                            "publish_time": safe_get_text("publish_time"),
+                            "url_long": page.url
+                            }
+                }, ensure_ascii=False)
+            
+            elif status == "PAGE_NOT_FOUND":
+                result = json.dumps({
+                    "code": 200,
+                    "message": "PAGE_NOT_FOUND已下架",
+                    "data": {
+                            "source": "抖音",
+                            "status": "PAGE_NOT_FOUND",
+                            "message": "检查到作品已下架"
+                            }
+                }, ensure_ascii=False)
+                return result
+
+            else:
+                result = json.dumps({
+                    "code": 400,
+                    "message": "400未找到对应元素，请检查路径或页面加载状态。",
+                    "data": {
+                            "source": "抖音",
+                            "status": "400",
+                            "message": "未找到对应元素，请检查路径或页面加载状态。",
+                            "url_long": page.url
+                            }
+                }, ensure_ascii=False)
+                print("未找到对应元素，请检查路径或页面加载状态。")
+                return result
+            
+            # 尝试下载视频
+            if status == "ALL_READY" and download_video:
+                close_login_popup(close_btn)
+                video_url = locators["video"].get_attribute("src")
+                print('下载视频中...')   
+                
+                # 路径保护与文件名合法性处理
+                save_path = f"{save_dir}/{title}-{author}.mp4"
+                path_obj = Path(save_path)
+                directory = path_obj.parent
+                # 对文件名（不含后缀）进行合法性审查并重新拼接
+                safe_name = f"{safe_filename(path_obj.stem)}{path_obj.suffix}"
+                safe_save_path = str(directory / safe_name)
+                
+                # 确保目录存在（路径保护）
+                directory.mkdir(parents=True, exist_ok=True)
+
+                response = page.request.get(video_url)
+                with open(safe_save_path, "wb") as f:
+                    f.write(response.body()) 
+                print(f"视频已保存至: {safe_save_path}")
         
-        # 尝试下载视频
-        if status == "ALL_READY" and download_video:
-            close_login_popup(close_btn)
-            video_url = locators["video"].get_attribute("src")
-            print('下载视频中...')   
-            response = page.request.get(video_url)
-            with open(f"{save_dir}/{title}-{author}.mp4", "wb") as f:
-                f.write(response.body()) 
-        
+        if "douyin.com/note" in page.url:
+            close_btn = page.locator(xpaths["close_btn"])
+            # 统一构建locator
+            locators = {k: page.locator(v) for k, v in xpaths.items()}
+
+            # 3️⃣ 等待正文就绪
+            status = poll_until_ready(page=page, close_btn=close_btn, locators=locators, wait_list=wait_list)
+            
+            if status == "ALL_READY":
+                def safe_get_text(key):
+                    """
+                    安全获取元素文本，处理可能的异常
+                    """
+
+                    start_time = time.time()
+                    try:
+                        r = locators[key].first.inner_text(timeout=1000)
+                        if time.time() - start_time > 0.5:
+                            print(f"warning: {key} 耗时 {time.time() - start_time} 秒")
+                        return r
+                    except Exception:
+                        '''
+                        # example: title 元素排版有时候很怪出现异常，导致获取失败，这里添加异常处理
+                        if key == "title":
+                            try:
+                                r = locators["title_bak1"].first.inner_text(timeout=1000)
+                                if time.time() - start_time > 0.5:
+                                    print(f"warning: {key} 耗时 {time.time() - start_time} 秒")
+                                return r
+                            except Exception:
+                                if time.time() - start_time > 0.5:
+                                    print(f"error: {key} 耗时 {time.time() - start_time} 秒，title_bak1也不存在，获取title失败")
+                                return None
+
+                        else:
+                            '''
+                        if time.time() - start_time > 0.5:
+                            print(f"warning: {key} 耗时 {time.time() - start_time} 秒，且进入了异常处理（是否因为该元素不存在？）")
+                        return None
+
+                title = safe_get_text("title")
+                author = safe_get_text("author")
+                result = json.dumps({
+                    "code": 200,
+                    "message": "success",
+                    "data": {
+                            "source": "抖音",
+                            "status": "200",
+                            "title": title, 
+                            "author": author, 
+                            "likes": safe_get_text("likes"), 
+                            "comments": safe_get_text("comments"), 
+                            "shares": safe_get_text("shares"), 
+                            "fans": safe_get_text("fans"),
+                            "publish_time": safe_get_text("publish_time"),
+                            "url_long": page.url
+                            }
+                }, ensure_ascii=False)
+            
+            elif status == "PAGE_NOT_FOUND":
+                result = json.dumps({
+                    "code": 200,
+                    "message": "PAGE_NOT_FOUND已下架",
+                    "data": {
+                            "source": "抖音",
+                            "status": "PAGE_NOT_FOUND",
+                            "message": "检查到作品已下架"
+                            }
+                }, ensure_ascii=False)
+                return result
+
+            else:
+                result = json.dumps({
+                    "code": 400,
+                    "message": "400未找到对应元素，请检查路径或页面加载状态。",
+                    "data": {
+                            "source": "抖音",
+                            "status": "400",
+                            "message": "未找到对应元素，请检查路径或页面加载状态。",
+                            "url_long": page.url
+                            }
+                }, ensure_ascii=False)
+                print("未找到对应元素，请检查路径或页面加载状态。")
+                return result
+            
+            # 尝试下载视频
+            if status == "ALL_READY" and download_video:
+                close_login_popup(close_btn)
+                video_url = locators["video"].get_attribute("src")
+                print('下载视频中...')   
+                
+                # 路径保护与文件名合法性处理
+                save_path = f"{save_dir}/{title}-{author}.mp4"
+                path_obj = Path(save_path)
+                directory = path_obj.parent
+                # 对文件名（不含后缀）进行合法性审查并重新拼接
+                safe_name = f"{safe_filename(path_obj.stem)}{path_obj.suffix}"
+                safe_save_path = str(directory / safe_name)
+                
+                # 确保目录存在（路径保护）
+                directory.mkdir(parents=True, exist_ok=True)
+
+                response = page.request.get(video_url)
+                with open(safe_save_path, "wb") as f:
+                    f.write(response.body()) 
+                print(f"视频已保存至: {safe_save_path}")
+
         return result
 
 
@@ -166,7 +322,9 @@ if __name__ == "__main__":
     # https://v.douyin.com/CpcD7JUpYEk/ 已下架
     # https://v.douyin.com/WogUSRW-pzM/ 短链接
     # https://www.iesdouyin.com/share/video/7568635678734328811 长link
-    url = "https://v.douyin.com/WogUSRW-pzM/"
+
+    # https://www.douyin.com/video/7566611297145290425?7566674254713979675
+    url = "https://www.iesdouyin.com/share/video/7568635678734328811"
     
     config = Config_Douyin() 
     # XPath路径

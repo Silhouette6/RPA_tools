@@ -7,6 +7,16 @@ import re
 from urllib3.util import url
 from config import Config_Xhs
 
+def safe_filename(name, max_len=100):
+    """
+    文件名合法性审查
+    """
+    name = re.sub(r'[\\/:*?"<>|]', "_", name)
+    name = name.strip()
+    if not name:
+        name = "unnamed"
+    return name[:max_len]
+
 def close_login_popup(close_btn):
     start_time = time.time()
     try:
@@ -83,6 +93,16 @@ def download(page, img_xpath, save_dir, close_btn):
     :return: img_url 或 "screenshot"
     """
 
+    # 路径保护与文件名合法性处理
+    path_obj = Path(save_dir)
+    directory = path_obj.parent
+    # 对文件名（不含后缀）进行合法性审查并重新拼接
+    safe_name = f"{safe_filename(path_obj.stem)}{path_obj.suffix}"
+    safe_save_path = str(directory / safe_name)
+    
+    # 确保目录存在（路径保护）
+    directory.mkdir(parents=True, exist_ok=True)
+
     for xp in img_xpath:
         try:
             img = page.locator(xp).first
@@ -107,7 +127,7 @@ def download(page, img_xpath, save_dir, close_btn):
 
             # ===== 3️⃣ 下载 =====
             response = page.request.get(img_url)
-            with open(save_dir, "wb") as f:
+            with open(safe_save_path, "wb") as f:
                 f.write(response.body())
 
             return img_url
@@ -116,10 +136,10 @@ def download(page, img_xpath, save_dir, close_btn):
             continue
 
     # ===== 4️⃣ 兜底策略：截屏 =====
-    print(f"解析图片失败，采用截屏策略保存至 {save_dir}")
+    print(f"解析图片失败，采用截屏策略保存至 {safe_save_path}")
     close_login_popup(close_btn)
     time.sleep(0.3)
-    page.screenshot(path=save_dir)
+    page.screenshot(path=safe_save_path)
     return "screenshot"
 
 def get_xhs_info(url, xpaths, wait_list, save_dir, download_img = True):
@@ -145,9 +165,18 @@ def get_xhs_info(url, xpaths, wait_list, save_dir, download_img = True):
         
         if status == "ALL_READY":
             def safe_get_text(key):
+                """
+                安全获取元素文本，处理可能的异常
+                """
+                start_time = time.time()
                 try:
-                    return locators[key].first.inner_text()
+                    r = locators[key].first.inner_text(timeout=1000)
+                    if time.time() - start_time > 0.5:
+                        print(f"warning: {key} 耗时 {time.time() - start_time} 秒")
+                    return r
                 except Exception:
+                    if time.time() - start_time > 0.5:
+                        print(f"warning: {key} 耗时 {time.time() - start_time} 秒，且进入了异常处理（是否因为该元素不存在？）")
                     return None
 
             title = safe_get_text("title")
@@ -170,6 +199,7 @@ def get_xhs_info(url, xpaths, wait_list, save_dir, download_img = True):
                         "url_long": page.url
                         }
             }, ensure_ascii=False)
+            # print(result)
         
         elif status == "PAGE_NOT_FOUND":
             result = json.dumps({
@@ -228,7 +258,7 @@ if __name__ == "__main__":
     # http://xhslink.com/o/3C2UqEN1jIz 已下架
     # https://www.xiaohongshu.com/discovery/item/6911a4c30000000004005418 移动端扫码链接
     
-    url = "http://xhslink.com/o/8PdviBz0NBi"
+    url = "http://xhslink.com/o/3C2UqEN1jIz"
     
     config = Config_Xhs()
 

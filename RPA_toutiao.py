@@ -1,4 +1,4 @@
-from re import L
+import re
 from playwright.sync_api import sync_playwright
 from pathlib import Path
 import time
@@ -12,7 +12,30 @@ TODO:
 toutiao/w
 toutiao/video
 """
+def safe_filename(name, max_len=100):
+    """
+    文件名合法性审查
+    """
+    name = re.sub(r'[\\/:*?"<>|]', "_", name)
+    name = name.strip()
+    if not name:
+        name = "unnamed"
+    return name[:max_len]
+
 def download(page, video_locator, save_path):
+    """
+    下载视频并应用路径保护与文件名合法性审查
+    """
+    # 路径保护与文件名合法性处理
+    path_obj = Path(save_path)
+    directory = path_obj.parent
+    # 对文件名（不含后缀）进行合法性审查并重新拼接
+    safe_name = f"{safe_filename(path_obj.stem)}{path_obj.suffix}"
+    safe_save_path = str(directory / safe_name)
+    
+    # 确保目录存在（路径保护）
+    directory.mkdir(parents=True, exist_ok=True)
+
     try:
         # 等 video 出现在 DOM 中即可，不用等播放
         video_locator.wait_for(state="attached", timeout=10000)
@@ -38,10 +61,10 @@ def download(page, video_locator, save_path):
         if not response.ok:
             raise RuntimeError(f"download failed: {response.status} {response.status_text}")
 
-        with open(save_path, "wb") as f:
+        with open(safe_save_path, "wb") as f:
             f.write(response.body())
 
-        print("video saved to:", save_path)
+        print("video saved to:", safe_save_path)
         return "video"
 
     except Exception as e:
@@ -235,7 +258,7 @@ if __name__ == "__main__":
     # https://www.toutiao.com/video/7523088690436898851/#ocr 视频
     # https://www.toutiao.com/video/7571580926610636841/ 视频2
     # https://www.toutiao.com/video/7571303297971060770/#ocr 视频已下架
-    url = "https://www.toutiao.com/video/7571303297971060770/#ocr"
+    url = "https://www.toutiao.com/video/7523088690436898851/#ocr"
     
     config = Config_Toutiao() 
     # XPath路径

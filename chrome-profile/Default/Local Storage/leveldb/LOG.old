@@ -1,5 +1,3 @@
-2025/12/19-17:43:04.946 85d4 Reusing MANIFEST d:\Project\public_sentiment\RPA_new\chrome-profile\Default\Local Storage\leveldb/MANIFEST-000001
-2025/12/19-17:43:04.954 85d4 Recovering log #14
-2025/12/19-17:43:04.957 85d4 Reusing old log d:\Project\public_sentiment\RPA_new\chrome-profile\Default\Local Storage\leveldb/000014.log 
-2025/12/19-17:43:19.540 85d4 Level-0 table #17: started
-2025/12/19-17:43:19.664 85d4 Level-0 table #17: 26186 bytes OK
+2025/12/22-10:52:00.628 91f4 Reusing MANIFEST d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Local Storage\leveldb/MANIFEST-000001
+2025/12/22-10:52:00.631 91f4 Recovering log #30
+2025/12/22-10:52:00.633 91f4 Reusing old log d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Local Storage\leveldb/000030.log 
