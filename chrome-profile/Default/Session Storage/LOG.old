@@ -1,3 +1,2 @@
-2025/12/22-13:57:31.874 4c88 Reusing MANIFEST d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Session Storage/MANIFEST-000001
-2025/12/22-13:57:31.875 4c88 Recovering log #7
-2025/12/22-13:57:31.877 4c88 Reusing old log d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Session Storage/000007.log 
+2025/12/22-14:14:26.493 35a8 Creating DB d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Session Storage__tmp_for_rebuild since it was missing.
+2025/12/22-14:14:26.923 35a8 Reusing MANIFEST d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Session Storage__tmp_for_rebuild/MANIFEST-000001
