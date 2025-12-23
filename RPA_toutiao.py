@@ -5,6 +5,7 @@ import time
 import json
 from urllib3.util import url
 from config import Config_Toutiao
+from typing import Optional
 
 """
 头条RPA，基于层级结构提取内容
@@ -22,7 +23,7 @@ def safe_filename(name, max_len=100):
         name = "unnamed"
     return name[:max_len]
 
-def download(page, video_locator, save_path):
+def download(page, video_locator, save_path, download_img: bool = True):
     """
     下载视频并应用路径保护与文件名合法性审查
     """
@@ -42,34 +43,22 @@ def download(page, video_locator, save_path):
 
         video_url = video_locator.get_attribute("src")
         if not video_url:
-            raise RuntimeError("video src not found")
-
+            return None
         if video_url.startswith("//"):
             video_url = "https:" + video_url
-
-        print("video url:", video_url)
-
-        # 增加 Referer 头部，头条视频 CDN 通常会校验来源
         headers = {
             "Referer": "https://www.toutiao.com/",
             "User-Agent": page.evaluate("navigator.userAgent")
         }
-
-        # timeout 单位是毫秒，增加到 10 秒以应对大视频
-        response = page.request.get(video_url, headers=headers, timeout=10000)
-        
-        if not response.ok:
-            raise RuntimeError(f"download failed: {response.status} {response.status_text}")
-
-        with open(safe_save_path, "wb") as f:
-            f.write(response.body())
-
-        print("video saved to:", safe_save_path)
-        return "video"
-
-    except Exception as e:
-        print(f"download video failed: {str(e)}")
-        return "download_video_failed"
+        if download_img:
+            response = page.request.get(video_url, headers=headers, timeout=10000)
+            if not response.ok:
+                return video_url
+            with open(safe_save_path, "wb") as f:
+                f.write(response.body())
+        return video_url
+    except Exception:
+        return None
 
 def poll_until_ready(
     page,
@@ -88,7 +77,7 @@ def poll_until_ready(
     not_ready = None
 
     while time.time() - start < timeout:
-        print("tring")
+        # print("tring")
 
         # 2️⃣ 检查特殊页面状态
         if page.get_by_text("内容不存在").count() > 0:
@@ -114,141 +103,163 @@ def poll_until_ready(
         print(f"not ready locator: {not_ready}")
     raise TimeoutError("page not ready within timeout")
 
-def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = True):
+def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = False, user_data_dir: Optional[str] = None, headless: bool = False):
 
     with sync_playwright() as p:
-        user_data_dir = str(Path(__file__).parent / "chrome-profile")
+        if user_data_dir is None:
+            user_data_dir = str(Path(__file__).parent / "chrome-profile")
         context = p.chromium.launch_persistent_context(
             user_data_dir=user_data_dir,
             channel="chrome",
-            headless=False,
+            headless=headless,
         )
-        page = context.new_page()
+        try:
+            page = context.new_page()
 
-        print(f"Opening {url} ...")
-        page.goto(url, wait_until="domcontentloaded")
+            print(f"Opening {url} ...")
+            page.goto(url, wait_until="domcontentloaded")
 
-        if "toutiao.com/w" in url: # 处理微头条
-            w_xpaths = xpaths["w_xpaths"]
-            w_wait_list = wait_list["w_wait_list"]
-            # 统一构建locator
-            locators = {k: page.locator(v) for k, v in w_xpaths.items()}
+            if "toutiao.com/w" in url:
+                w_xpaths = xpaths["w_xpaths"]
+                w_wait_list = wait_list["w_wait_list"]
+                locators = {k: page.locator(v) for k, v in w_xpaths.items()}
 
-            # 3️⃣ 等待正文就绪
-            status = poll_until_ready(page=page, locators=locators, wait_list=w_wait_list)
-        
-            if status == "ALL_READY":
-                def safe_get_text(key):
-                    try:
-                        return locators[key].first.inner_text()
-                    except Exception:
-                        return None
-
-                content = safe_get_text("w_content")
-                author = safe_get_text("w_author")
-                result = json.dumps({
-                    "code": 200,
-                    "message": "success",
-                    "data": {
-                            "source": "微头条",
-                            "status": "200",
-                            "content": content, 
-                            "author": author, 
-                            "likes": safe_get_text("w_likes"), 
-                            "publish_time": safe_get_text("w_publish_time"),
-                            "url_long": page.url
-                            }
-                }, ensure_ascii=False)
+                status = poll_until_ready(page=page, locators=locators, wait_list=w_wait_list)
             
-            elif status == "PAGE_NOT_FOUND":
-                result = json.dumps({
-                    "code": 200,
-                    "message": "PAGE_NOT_FOUND已下架",
-                    "data": {
-                            "source": "微头条",
-                            "status": "PAGE_NOT_FOUND",
-                            "message": "检查到作品已下架"
-                            }
-                }, ensure_ascii=False)
-                return result
+                if status == "ALL_READY":
+                    def safe_get_text(key):
+                        try:
+                            return locators[key].first.inner_text()
+                        except Exception:
+                            return None
 
+                    content = safe_get_text("w_content")
+                    author = safe_get_text("w_author")
+                    likes = safe_get_text("w_likes")
+                    publish_time = safe_get_text("w_publish_time")
+                    url_long = page.url
+
+                    result = json.dumps({
+                        "code": 200,
+                        "message": "success",
+                        "data": {
+                                "source": "微头条",
+                                "status": "200",
+                                "content": content, 
+                                "author": author, 
+                                "likes": likes, 
+                                "publish_time": publish_time,
+                                "url_long": url_long,
+                                "video_url": None
+                                }
+                    }, ensure_ascii=False)
+                
+                elif status == "PAGE_NOT_FOUND":
+                    result = json.dumps({
+                        "code": 200,
+                        "message": "PAGE_NOT_FOUND已下架",
+                        "data": {
+                                "source": "微头条",
+                                "status": "PAGE_NOT_FOUND",
+                                "message": "检查到作品已下架"
+                                }
+                    }, ensure_ascii=False)
+                    return result
+
+                else:
+                    result = json.dumps({
+                        "code": 400,
+                        "message": "400未找到对应元素，请检查路径或页面加载状态。",
+                        "data": {
+                                "source": "微头条",
+                                "status": "400",
+                                "message": "未找到对应元素，请检查路径或页面加载状态。",
+                                "url_long": page.url
+                                }
+                    }, ensure_ascii=False)
+                    print("未找到对应元素，请检查路径或页面加载状态。")
+                    return result
+            
+            elif "toutiao.com/video" in url:
+                video_xpaths = xpaths["video_xpaths"]
+                video_wait_list = wait_list["video_wait_list"]
+                locators = {k: page.locator(v) for k, v in video_xpaths.items()}
+
+                status = poll_until_ready(page=page, locators=locators, wait_list=video_wait_list)
+            
+                if status == "ALL_READY":
+                    def safe_get_text(key):
+                        try:
+                            return locators[key].first.inner_text()
+                        except Exception:
+                            return None
+
+                    content = safe_get_text("video_content")
+                    author = safe_get_text("video_author")
+                    views = safe_get_text("video_views")
+                    likes = safe_get_text("video_likes")
+                    publish_time = safe_get_text("video_publish_time")
+                    url_long = page.url
+                    
+                    video_url = download(page, locators["video_video"].first, f"{save_dir}/{author}.mp4", download_img=download_video)
+
+                    result = json.dumps({
+                        "code": 200,
+                        "message": "success",
+                        "data": {
+                                "source": "头条视频",
+                                "status": "200",
+                                "content": content, 
+                                "author": author, 
+                                "views": views, 
+                                "likes": likes, 
+                                "publish_time": publish_time,
+                                "url_long": url_long,
+                                "video_url": video_url
+                                }
+                    }, ensure_ascii=False)
+                
+                elif status == "PAGE_NOT_FOUND":
+                    result = json.dumps({
+                        "code": 200,
+                        "message": "PAGE_NOT_FOUND已下架",
+                        "data": {
+                                "source": "头条视频",
+                                "status": "PAGE_NOT_FOUND",
+                                "message": "检查到作品已下架"
+                                }
+                    }, ensure_ascii=False)
+                    return result
+
+                else:
+                    result = json.dumps({
+                        "code": 400,
+                        "message": "400未找到对应元素，请检查路径或页面加载状态。",
+                        "data": {
+                                "source": "头条视频",
+                                "status": "400",
+                                "message": "未找到对应元素，请检查路径或页面加载状态。",
+                                "url_long": page.url
+                                }
+                    }, ensure_ascii=False)
+                    print("未找到对应元素，请检查路径或页面加载状态。")
+                    return result
             else:
                 result = json.dumps({
                     "code": 400,
-                    "message": "400未找到对应元素，请检查路径或页面加载状态。",
+                    "message": "400不支持的url类型",
                     "data": {
-                            "source": "微头条",
+                            "source": "头条",
                             "status": "400",
-                            "message": "未找到对应元素，请检查路径或页面加载状态。",
+                            "message": "不支持的url类型",
                             "url_long": page.url
-                            }
-                }, ensure_ascii=False)
-                print("未找到对应元素，请检查路径或页面加载状态。")
-                return result
-        
-        if "toutiao.com/video" in url: # 处理视频
-            video_xpaths = xpaths["video_xpaths"]
-            video_wait_list = wait_list["video_wait_list"]
-            # 统一构建locator
-            locators = {k: page.locator(v) for k, v in video_xpaths.items()}
-
-            # 3️⃣ 等待正文就绪
-            status = poll_until_ready(page=page, locators=locators, wait_list=video_wait_list)
-        
-            if status == "ALL_READY":
-                def safe_get_text(key):
-                    try:
-                        return locators[key].first.inner_text()
-                    except Exception:
-                        return None
-
-                content = safe_get_text("video_content")
-                author = safe_get_text("video_author")    
-                result = json.dumps({
-                    "code": 200,
-                    "message": "success",
-                    "data": {
-                            "source": "头条视频",
-                            "status": "200",
-                            "content": content, 
-                            "author": author, 
-                            "views": safe_get_text("video_views"), 
-                            "likes": safe_get_text("video_likes"), 
-                            "publish_time": safe_get_text("video_publish_time"),
-                            "url_long": page.url
-                            }
-                }, ensure_ascii=False)
-
-                if download_video:
-                    download(page, locators["video_video"].first, f"{save_dir}/{author}.mp4")
-            
-            elif status == "PAGE_NOT_FOUND":
-                result = json.dumps({
-                    "code": 200,
-                    "message": "PAGE_NOT_FOUND已下架",
-                    "data": {
-                            "source": "头条视频",
-                            "status": "PAGE_NOT_FOUND",
-                            "message": "检查到作品已下架"
                             }
                 }, ensure_ascii=False)
                 return result
 
-            else:
-                result = json.dumps({
-                    "code": 400,
-                    "message": "400未找到对应元素，请检查路径或页面加载状态。",
-                    "data": {
-                            "source": "头条视频",
-                            "status": "400",
-                            "message": "未找到对应元素，请检查路径或页面加载状态。",
-                            "url_long": page.url
-                            }
-                }, ensure_ascii=False)
-                print("未找到对应元素，请检查路径或页面加载状态。")
-                return result
-        
-        return result
+            return result
+        finally:
+            context.close()
 
 
 if __name__ == "__main__":
@@ -258,7 +269,7 @@ if __name__ == "__main__":
     # https://www.toutiao.com/video/7523088690436898851/#ocr 视频
     # https://www.toutiao.com/video/7571580926610636841/ 视频2
     # https://www.toutiao.com/video/7571303297971060770/#ocr 视频已下架
-    url = "https://www.toutiao.com/w/1850641232900096/"
+    url = "https://www.toutiao.com/video/7523088690436898851/#ocr"
     
     config = Config_Toutiao() 
     # XPath路径
@@ -267,5 +278,5 @@ if __name__ == "__main__":
     wait_list = config.wait_list
     save_dir = config.save_dir
 
-    result = get_toutiao_info(url, xpaths, wait_list, save_dir, download_video=True)
+    result = get_toutiao_info(url, xpaths, wait_list, save_dir, download_video=False)
     print(result)

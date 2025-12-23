@@ -1,2 +1,3 @@
-2025/12/22-14:14:26.494 8058 Creating DB d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Local Storage\leveldb__tmp_for_rebuild since it was missing.
-2025/12/22-14:14:26.923 8058 Reusing MANIFEST d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Local Storage\leveldb__tmp_for_rebuild/MANIFEST-000001
+2025/12/23-14:14:11.263 98dc Reusing MANIFEST d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Local Storage\leveldb/MANIFEST-000001
+2025/12/23-14:14:11.267 98dc Recovering log #16
+2025/12/23-14:14:11.268 98dc Reusing old log d:\Project\public_sentiment\RPA_tools\chrome-profile\Default\Local Storage\leveldb/000016.log 
