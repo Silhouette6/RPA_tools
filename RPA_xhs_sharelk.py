@@ -208,17 +208,18 @@ def get_xhs_info(url, xpaths, wait_list, save_dir, download_img = False, user_da
                     "code": 200,
                     "message": "success",
                     "data": {
-                            "source": "小红书",
+                            "web_name": "小红书",
                             "status": "200",
                             "title": title, 
                             "content": content,
                             "author": author, 
-                            "likes": likes, 
+                            "praise_count": likes, 
                             "favours": favours,
-                            "comments": comments, 
+                            "reply_count": comments, 
                             "publish_time": publish_time,
-                            "url_long": url_long,
-                            "video_url": final_media_url # 这里返回最终确定的媒体地址或 "screenshot"
+                            "message": "success",
+                            "url": url_long,
+                            "video_urls": final_media_url # 这里返回最终确定的媒体地址或 "screenshot"
                             }
                 }, ensure_ascii=False)
 
@@ -228,10 +229,10 @@ def get_xhs_info(url, xpaths, wait_list, save_dir, download_img = False, user_da
                     "code": 200,
                     "message": "PAGE_NOT_FOUND已下架",
                     "data": {
-                            "source": "小红书",
+                            "web_name": "小红书",
                             "status": "PAGE_NOT_FOUND",
                             "message": "检查到作品已下架",
-                            "url_long": page.url
+                            "url": page.url
                             }
                 }, ensure_ascii=False)
                 return result
@@ -241,10 +242,10 @@ def get_xhs_info(url, xpaths, wait_list, save_dir, download_img = False, user_da
                     "code": 200,
                     "message": "MOBILE_LINK移动端链接无法直接访问",
                     "data": {
-                            "source": "小红书",
+                            "web_name": "小红书",
                             "status": "MOBILE_LINK",
                             "message": "该网页为移动端链接，需要app扫描授权",
-                            "url_long": page.url
+                            "url": page.url
                             }
                 }, ensure_ascii=False)
                 return result
@@ -253,10 +254,10 @@ def get_xhs_info(url, xpaths, wait_list, save_dir, download_img = False, user_da
                     "code": 400,
                     "message": "400未找到对应元素，请检查路径或页面加载状态。",
                     "data": {
-                            "source": "小红书",
+                            "web_name": "小红书",
                             "status": "400",
                             "message": "未找到对应元素，请检查路径或页面加载状态。",
-                            "url_long": page.url
+                            "url": page.url
                             }
                 }, ensure_ascii=False)
                 print("未找到对应元素，请检查路径或页面加载状态。")

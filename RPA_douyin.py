@@ -200,17 +200,17 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                         "code": 200,
                         "message": "success",
                         "data": {
-                                "source": "抖音",
+                                "web_name": "抖音",
                                 "status": "200",
                                 "title": title, 
                                 "author": author, 
-                                "likes": like, 
-                                "comments": comments, 
-                                "shares": shares, 
-                                "fans": fans,
+                                "praise_count": like, 
+                                "reply_count": comments, 
+                                "forward_count": shares, 
+                                "author_fans_count": fans,
                                 "publish_time": publish_time,
-                                "url_long": url_long,
-                                "video_url": final_video_url
+                                "url": url_long,
+                                "video_urls": final_video_url
                                 }
                     }, ensure_ascii=False)
 
@@ -220,7 +220,7 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                         "code": 200,
                         "message": "PAGE_NOT_FOUND已下架",
                         "data": {
-                                "source": "抖音",
+                                "web_name": "抖音",
                                 "status": "PAGE_NOT_FOUND",
                                 "message": "检查到作品已下架"
                                 }
@@ -232,10 +232,10 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                         "code": 400,
                         "message": "400未找到对应元素，请检查路径或页面加载状态。",
                         "data": {
-                                "source": "抖音",
+                                "web_name": "抖音",
                                 "status": "400",
                                 "message": "未找到对应元素，请检查路径或页面加载状态。",
-                                "url_long": page.url
+                                "url": page.url
                                 }
                     }, ensure_ascii=False)
                     print("未找到对应元素，请检查路径或页面加载状态。")
@@ -291,18 +291,18 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                         "code": 200,
                         "message": "success",
                         "data": {
-                                "source": "抖音",
+                                "web_name": "抖音",
                                 "status": "200",
                                 "title": title, 
                                 "author": author, 
-                                "likes": likes, 
-                                "comments": comments, 
-                                "favorites": favorites,
-                                "shares": shares, 
-                                "fans": fans,
+                                "praise_count": likes, 
+                                "reply_count": comments, 
+                                "favourite_count": favorites,
+                                "forward_count": shares, 
+                                "author_fans_count": fans,
                                 "publish_time": publish_time,
-                                "url_long": url_long,
-                                "video_url": final_media_url
+                                "url": url_long,
+                                "video_urls": final_media_url
                                 }
                     }, ensure_ascii=False)
 
@@ -311,7 +311,7 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                         "code": 200,
                         "message": "PAGE_NOT_FOUND已下架",
                         "data": {
-                                "source": "抖音",
+                                "web_name": "抖音",
                                 "status": "PAGE_NOT_FOUND",
                                 "message": "检查到作品已下架"
                                 }
@@ -323,10 +323,10 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                         "code": 400,
                         "message": "400未找到对应元素，请检查路径或页面加载状态。",
                         "data": {
-                                "source": "抖音",
+                                "web_name": "抖音",
                                 "status": "400",
                                 "message": "未找到对应元素，请检查路径或页面加载状态。",
-                                "url_long": page.url
+                                "url": page.url
                                 }
                     }, ensure_ascii=False)
                     print("未找到对应元素，请检查路径或页面加载状态。")

@@ -143,14 +143,14 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = False, u
                         "code": 200,
                         "message": "success",
                         "data": {
-                                "source": "微头条",
+                                "web_name": "微头条",
                                 "status": "200",
                                 "content": content, 
                                 "author": author, 
-                                "likes": likes, 
+                                "praise_count": likes, 
                                 "publish_time": publish_time,
-                                "url_long": url_long,
-                                "video_url": None
+                                "url": url_long,
+                                "video_urls": None
                                 }
                     }, ensure_ascii=False)
                 
@@ -159,7 +159,7 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = False, u
                         "code": 200,
                         "message": "PAGE_NOT_FOUND已下架",
                         "data": {
-                                "source": "微头条",
+                                "web_name": "微头条",
                                 "status": "PAGE_NOT_FOUND",
                                 "message": "检查到作品已下架"
                                 }
@@ -171,10 +171,10 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = False, u
                         "code": 400,
                         "message": "400未找到对应元素，请检查路径或页面加载状态。",
                         "data": {
-                                "source": "微头条",
+                                "web_name": "微头条",
                                 "status": "400",
                                 "message": "未找到对应元素，请检查路径或页面加载状态。",
-                                "url_long": page.url
+                                "url": page.url
                                 }
                     }, ensure_ascii=False)
                     print("未找到对应元素，请检查路径或页面加载状态。")
@@ -207,15 +207,15 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = False, u
                         "code": 200,
                         "message": "success",
                         "data": {
-                                "source": "头条视频",
+                                "web_name": "头条视频",
                                 "status": "200",
                                 "content": content, 
                                 "author": author, 
                                 "views": views, 
-                                "likes": likes, 
+                                "praise_count": likes, 
                                 "publish_time": publish_time,
-                                "url_long": url_long,
-                                "video_url": video_url
+                                "url": url_long,
+                                "video_urls": video_url
                                 }
                     }, ensure_ascii=False)
                 
@@ -224,7 +224,7 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = False, u
                         "code": 200,
                         "message": "PAGE_NOT_FOUND已下架",
                         "data": {
-                                "source": "头条视频",
+                                "web_name": "头条视频",
                                 "status": "PAGE_NOT_FOUND",
                                 "message": "检查到作品已下架"
                                 }
@@ -236,10 +236,10 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = False, u
                         "code": 400,
                         "message": "400未找到对应元素，请检查路径或页面加载状态。",
                         "data": {
-                                "source": "头条视频",
+                                "web_name": "头条视频",
                                 "status": "400",
                                 "message": "未找到对应元素，请检查路径或页面加载状态。",
-                                "url_long": page.url
+                                "url": page.url
                                 }
                     }, ensure_ascii=False)
                     print("未找到对应元素，请检查路径或页面加载状态。")
@@ -249,10 +249,10 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = False, u
                     "code": 400,
                     "message": "400不支持的url类型",
                     "data": {
-                            "source": "头条",
+                            "web_name": "头条",
                             "status": "400",
                             "message": "不支持的url类型",
-                            "url_long": page.url
+                            "url": page.url
                             }
                 }, ensure_ascii=False)
                 return result

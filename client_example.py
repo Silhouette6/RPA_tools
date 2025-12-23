@@ -1,4 +1,3 @@
-from re import T
 import requests
 import json
 
@@ -8,7 +7,7 @@ def test_xhs():
     print("\n--- Testing 小红书 ---")
     payload = {
         "url": "http://xhslink.com/o/6kZ7NPjrUJa",
-        "download_img": False,
+        "download_img": True,
         "headless": True
     }
     try:
