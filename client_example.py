@@ -1,14 +1,16 @@
 import requests
 import json
 
-BASE_URL = "http://127.0.0.1:8000"
+# BASE_URL = "http://127.0.0.1:8000"
+
+BASE_URL= "http://192.168.30.137:8000"
 
 def test_xhs():
     print("\n--- Testing 小红书 ---")
     payload = {
         "url": "http://xhslink.com/o/6kZ7NPjrUJa",
         "download_img": True,
-        "headless": True
+        "headless": False
     }
     try:
         response = requests.post(f"{BASE_URL}/xhs", json=payload, timeout=60)
@@ -50,5 +52,5 @@ if __name__ == "__main__":
     # 也可以在不同终端同时运行此脚本测试并发排队
     for i in range(10):
         test_xhs()
-        test_douyin()
-        test_toutiao()
+        # test_douyin()
+        # test_toutiao()

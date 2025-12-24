@@ -52,13 +52,16 @@ def convent_json(code: int, title: str, url_long: str, content: str, final_media
         """
         根据URL判断媒体类型
         """
-        if "video" in url:
-            return "video"
-        elif "image" in url:
-            return "image"
-        elif "screenshot" in url:
-            return "screenshot"
-        else:
+        try:
+            if "video" in url:
+                return "video"
+            elif "image" in url:
+                return "image"
+            elif "screenshot" in url:
+                return "screenshot"
+            else:
+                return "unknown"
+        except Exception:
             return "unknown"
 
     def convert_counts(text: str) -> int | None:
@@ -562,5 +565,5 @@ if __name__ == "__main__":
     wait_list = config.wait_list
     save_dir = config.save_dir
 
-    result = get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video=False)
+    result = get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video=False, headless=False)
     print(result)

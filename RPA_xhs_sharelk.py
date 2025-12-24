@@ -4,7 +4,7 @@ from pathlib import Path
 import time
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib3.util import url
 from config import Config_Xhs
 from typing import Optional
@@ -15,19 +15,28 @@ def convent_json(code: int, title: str, url_long: str, content: str, final_media
         将形如：
         - '发布时间：2025-11-06 20:27:40'
         - '发布时间：2025-12-17 15:30'
+        - '6天前 广东'
         的字符串解析为 datetime 对象
 
         解析失败返回 None
         """
         if not text:
-            return text
+            return None
 
-        # 去掉前缀
         text = text.strip()
+
+        # ---------- 1. 处理 “X天前” ----------
+        # 例如：6天前 广东 / 6天前
+        match = re.search(r"(\d+)\s*天前", text)
+        if match:
+            days = int(match.group(1))
+            return str(datetime.now() - timedelta(days=days))
+
+        # ---------- 2. 去掉“发布时间：”前缀 ----------
         if "：" in text:
             text = text.split("：", 1)[1].strip()
 
-        # 尝试多种时间格式
+        # ---------- 3. 绝对时间格式 ----------
         formats = [
             "%Y-%m-%d %H:%M:%S",
             "%Y-%m-%d %H:%M",
@@ -39,19 +48,21 @@ def convent_json(code: int, title: str, url_long: str, content: str, final_media
             except ValueError:
                 continue
 
-        return text
-
+        return None
     def media_type(url: str) -> str:
         """
         根据URL判断媒体类型
         """
-        if "video" in url:
-            return "video"
-        elif "image" in url:
-            return "image"
-        elif "screenshot" in url:
-            return "screenshot"
-        else:
+        try:
+            if "video" in url:
+                return "video"
+            elif "image" in url or "blob" in url or "webp" in url:
+                return "image"
+            elif "screenshot" in url:
+                return "screenshot"
+            else:
+                return "unknown"
+        except Exception:
             return "unknown"
 
     def convert_counts(text: str) -> int | None:
@@ -514,7 +525,7 @@ if __name__ == "__main__":
     # http://xhslink.com/o/3C2UqEN1jIz 已下架
     # https://www.xiaohongshu.com/discovery/item/6911a4c30000000004005418 移动端扫码链接
     
-    url = "https://www.xiaohongshu.com/discovery/item/6911a4c30000000004005418"
+    url = "http://xhslink.com/o/8PdviBz0NBi"
     
     config = Config_Xhs()
 
@@ -523,5 +534,5 @@ if __name__ == "__main__":
     wait_list = config.wait_list
     save_dir = config.save_dir
 
-    result = get_xhs_info(url, xpaths, wait_list, save_dir, download_img=False)
+    result = get_xhs_info(url, xpaths, wait_list, save_dir, download_img=False, headless=False)
     print(result)

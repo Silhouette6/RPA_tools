@@ -513,7 +513,7 @@ if __name__ == "__main__":
     # https://www.toutiao.com/video/7523088690436898851/#ocr 视频
     # https://www.toutiao.com/video/7571580926610636841/ 视频2
     # https://www.toutiao.com/video/7571303297971060770/#ocr 视频已下架
-    url = "https://www.toutiao.com/video/7523088690436898851/#ocr"
+    url = "https://m.toutiao.com/w/1838313847231498/?app=news_article&category_new=__search__&module_name=Android_tt_others&share_did=MS4wLjACAAAAxMTOW9OFmwO1BIKhPg2st-nicYPfGJux1scZxlFuIZNwhHscB0hTHhBTYjVZYwN-&share_uid=MS4wLjABAAAAxMTOW9OFmwO1BIKhPg2st-nicYPfGJux1scZxlFuIZNwhHscB0hTHhBTYjVZYwN-&timestamp=1766557816&tt_from=wechat&upstream_biz=Android_wechat&utm_campaign=client_share&utm_medium=toutiao_android&utm_source=wechat&share_token=01485b04-98ea-458c-819b-108f3ebb9001"
     
     config = Config_Toutiao() 
     # XPath路径
@@ -522,5 +522,5 @@ if __name__ == "__main__":
     wait_list = config.wait_list
     save_dir = config.save_dir
 
-    result = get_toutiao_info(url, xpaths, wait_list, save_dir, download_video=False)
+    result = get_toutiao_info(url, xpaths, wait_list, save_dir, download_video=False, headless=False)
     print(result)
