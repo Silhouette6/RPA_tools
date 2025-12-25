@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from config import Config_Douyin, Config_Toutiao, Config_Xhs
+from config import Config_Douyin, Config_Toutiao, Config_Xhs, ServerConfig
 from RPA_douyin import get_douyin_short_video_info
 from RPA_toutiao import get_toutiao_info
 from RPA_xhs_sharelk import get_xhs_info
@@ -157,4 +157,5 @@ async def toutiao(req: ToutiaoRequest) -> Dict[str, Any]:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=False)
+    cfg = ServerConfig()
+    uvicorn.run("server:app", host=cfg.host, port=cfg.port, reload=False)
