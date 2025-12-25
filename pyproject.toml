@@ -11,3 +11,6 @@ dependencies = [
     "urllib3>=2.6.2",
     "uvicorn[standard]>=0.40.0",
 ]
+
+[tool.uv]
+python-install-mirror = "https://registry.npmmirror.com/-/binary/python-build-standalone/"
