@@ -49,6 +49,7 @@ def convent_json(code: int, title: str, url_long: str, content: str, final_media
                 continue
 
         return None
+    
     def media_type(url: str) -> str:
         """
         根据URL判断媒体类型

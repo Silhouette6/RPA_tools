@@ -342,7 +342,7 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = False, u
             print(f"Opening {url} ...")
             page.goto(url, wait_until="domcontentloaded")
 
-            if "toutiao.com/w" in url:
+            if "toutiao.com/w" in page.url:
                 w_xpaths = xpaths["w_xpaths"]
                 w_wait_list = wait_list["w_wait_list"]
                 locators = {k: page.locator(v) for k, v in w_xpaths.items()}
@@ -412,7 +412,7 @@ def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video = False, u
                     print("未找到对应元素，请检查路径或页面加载状态。")
                     return result
             
-            elif "toutiao.com/video" in url:
+            elif "toutiao.com/video" in page.url:
                 video_xpaths = xpaths["video_xpaths"]
                 video_wait_list = wait_list["video_wait_list"]
                 locators = {k: page.locator(v) for k, v in video_xpaths.items()}
@@ -513,7 +513,7 @@ if __name__ == "__main__":
     # https://www.toutiao.com/video/7523088690436898851/#ocr 视频
     # https://www.toutiao.com/video/7571580926610636841/ 视频2
     # https://www.toutiao.com/video/7571303297971060770/#ocr 视频已下架
-    url = "https://m.toutiao.com/w/1838313847231498/?app=news_article&category_new=__search__&module_name=Android_tt_others&share_did=MS4wLjACAAAAxMTOW9OFmwO1BIKhPg2st-nicYPfGJux1scZxlFuIZNwhHscB0hTHhBTYjVZYwN-&share_uid=MS4wLjABAAAAxMTOW9OFmwO1BIKhPg2st-nicYPfGJux1scZxlFuIZNwhHscB0hTHhBTYjVZYwN-&timestamp=1766557816&tt_from=wechat&upstream_biz=Android_wechat&utm_campaign=client_share&utm_medium=toutiao_android&utm_source=wechat&share_token=01485b04-98ea-458c-819b-108f3ebb9001"
+    url = "https://weitoutiao.zjurl.cn/ugc/share/wap/comment/7532665415143686975/#412c2b86822dc1697524f403d5fb32b0"
     
     config = Config_Toutiao() 
     # XPath路径
@@ -524,3 +524,5 @@ if __name__ == "__main__":
 
     result = get_toutiao_info(url, xpaths, wait_list, save_dir, download_video=False, headless=False)
     print(result)
+
+
