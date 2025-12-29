@@ -13,7 +13,7 @@ class Config_Douyin:
                 "video_close_btn": '//article/div/div/div/*[local-name()="svg"]'
                 },
             "note_xpaths" : {
-                "note_title": '//span[3]/span[1]/span[1]/span[1]',
+                "note_title": '//*[@id="douyin-right-container"]/div[2]/main/div[2]/div[2]',
                 "note_author": '//*[@id="douyin-right-container"]/div[2]/main/div[2]/div[1]/div[2]/a/div/span/span/span/span/span/span',
                 "note_likes": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]/div[2]/div[1]/div[1]/div/div[2]',
                 "note_comments": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]/div[2]/div[1]/div[2]/div/div[2]',

@@ -1,0 +1,19 @@
+# 浏览器用户数据（Playwright / Chrome）
+profiles/
+chrome-profile/
+
+# Playwright 默认缓存（可选但强烈建议）
+.playwright/
+.playwright-cache/
+
+# Python
+__pycache__/
+*.pyc
+
+# 虚拟环境
+.venv/
+venv/
+rpa/
+
+# 其他临时文件
+data/

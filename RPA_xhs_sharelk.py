@@ -126,7 +126,7 @@ def convent_json(code: int, title: str, url_long: str, content: str, final_media
                 "author_fans_count": fans,
                 "author_statuses_count": None,
                 "ip_region": None,
-                "user_id": author,  # 复用author
+                "user_id": None,  # 复用author
                 "author_avatar_url": None,
                 "media_urls": final_media_url,  # 无图片则设为空列表
             }

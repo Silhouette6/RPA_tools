@@ -124,7 +124,7 @@ def convent_json(code: int, title: str, url_long: str, content: str, final_media
                 "author_fans_count": fans,
                 "author_statuses_count": None,
                 "ip_region": None,
-                "user_id": author,  # 复用author
+                "user_id": None,  # 复用author
                 "author_avatar_url": None,
                 "media_urls": final_media_url,  # 无图片则设为空列表
             }
@@ -261,7 +261,7 @@ def download(page, save_dir, title, author, close_btn ,locator_video = None, dow
         # ===== 兜底策略：截屏 （处理note）=====
         
         # 路径保护与文件名合法性处理
-        save_path = f"{save_dir}/{title}-{author}.jpg"
+        save_path = f"{save_dir}/{author}.jpg"
         path_obj = Path(save_path)
         directory = path_obj.parent
         # 对文件名（不含后缀）进行合法性审查并重新拼接
@@ -370,6 +370,7 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                         start_time = time.time()
                         try:
                             r = locators[key].first.inner_text(timeout=1000)
+                            
                             if time.time() - start_time > 0.5:
                                 print(f"warning: {key} 耗时 {time.time() - start_time} 秒")
                             return r
@@ -466,6 +467,12 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                         start_time = time.time()
                         try:
                             r = locators[key].first.inner_text(timeout=1000)
+
+                            if r and key == "note_title":
+                                r = r.replace("\n", "").strip()
+                                # 去掉发布时间及之后的内容
+                                r = re.split(r"发布时间：", r)[0].strip()
+
                             if time.time() - start_time > 0.5:
                                 print(f"warning: {key} 耗时 {time.time() - start_time} 秒")
                             return r
@@ -556,7 +563,7 @@ if __name__ == "__main__":
     # https://www.iesdouyin.com/share/video/7568635678734328811 长link
 
     
-    url = "https://v.douyin.com/CpcD7JUpYEk/"
+    url = "https://v.douyin.com/SbTeoPlxMP0/"
 
     config = Config_Douyin() 
     # XPath路径

@@ -1,9 +1,9 @@
 import requests
 import json
 
-# BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "http://127.0.0.1:8000"
 
-BASE_URL= "http://127.0.0.1:8000"
+# BASE_URL= "http://192.168.30.137:8000"
 
 def test_xhs():
     print("\n--- Testing 小红书 ---", BASE_URL)
@@ -22,9 +22,9 @@ def test_xhs():
 def test_douyin():
     print("\n--- Testing 抖音 ---", BASE_URL)
     payload = {
-        "url": "https://v.douyin.com/WogUSRW-pzM/",
+        "url": "https://v.douyin.com/1YdDJg98DWs/",
         "download_video": False,
-        "headless": True
+        "headless": False
     }
     try:
         response = requests.post(f"{BASE_URL}/douyin", json=payload, timeout=60)
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     # 请确保 server.py 已经启动 (python server.py)
     # 也可以在不同终端同时运行此脚本测试并发排队
     # test_xhs()
-    test_toutiao()
+    test_douyin()
     
     '''
     for i in range(5):
