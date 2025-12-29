@@ -15,10 +15,10 @@ class Config_Douyin:
             "note_xpaths" : {
                 "note_title": '//*[@id="douyin-right-container"]/div[2]/main/div[2]/div[2]',
                 "note_author": '//*[@id="douyin-right-container"]/div[2]/main/div[2]/div[1]/div[2]/a/div/span/span/span/span/span/span',
-                "note_likes": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]/div[2]/div[1]/div[1]/div/div[2]',
-                "note_comments": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]/div[2]/div[1]/div[2]/div/div[2]',
-                "note_favourites": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]/div[2]/div[1]/div[3]/div[2]',
-                "note_shares": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]/div[2]/div[1]/div[4]/div/div[2]',
+                "note_likes": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]',
+                "note_comments": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]',
+                "note_favourites": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]',
+                "note_shares": '//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]',
                 "note_fans": '//*[@id="douyin-right-container"]/div[2]/main/div[2]/div[1]/div[2]/p/span[2]',
                 "note_publish_time": '//*[@id="douyin-right-container"]/div[2]/main/div[2]/div[2]/div/div[2]/span',
                 "note_close_btn": '//article/div/div/div/*[local-name()="svg"]'

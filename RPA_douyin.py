@@ -472,6 +472,21 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
                                 r = r.replace("\n", "").strip()
                                 # 去掉发布时间及之后的内容
                                 r = re.split(r"发布时间：", r)[0].strip()
+                            
+                            if r and key == "note_likes":
+                                tmp = r.split("\n")
+                                r = tmp[0].strip() # 点赞数为第一个元素
+                            if r and key == "note_comments":
+                                tmp = r.split("\n")
+                                r = tmp[1].strip() # 评论数为第二个元素
+                            if r and key == "note_favourites":
+                                tmp = r.split("\n")
+                                r = tmp[2].strip() # 收藏数为第三个元素
+                            if r and key == "note_shares":
+                                tmp = r.split("\n")
+                                r = tmp[3].strip() # 分享数为第四个元素
+
+
 
                             if time.time() - start_time > 0.5:
                                 print(f"warning: {key} 耗时 {time.time() - start_time} 秒")
@@ -504,9 +519,9 @@ def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video
 
                     result = convent_json(
                         code=200,
-                        title=title,
+                        title=None,
                         url_long=url_long,
-                        content=None,
+                        content=title,
                         final_media_url=final_media_url,
                         publish_time=publish_time,
                         web_name="抖音",
@@ -563,7 +578,7 @@ if __name__ == "__main__":
     # https://www.iesdouyin.com/share/video/7568635678734328811 长link
 
     
-    url = "https://v.douyin.com/SbTeoPlxMP0/"
+    url = "https://www.douyin.com/note/7532822704576220457"
 
     config = Config_Douyin() 
     # XPath路径

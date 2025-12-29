@@ -1,9 +1,9 @@
 import requests
 import json
 
-BASE_URL = "http://127.0.0.1:8000"
+# BASE_URL = "http://127.0.0.1:8000"
 
-# BASE_URL= "http://192.168.30.137:8000"
+BASE_URL= "http://192.168.30.137:8000"
 
 def test_xhs():
     print("\n--- Testing 小红书 ---", BASE_URL)
