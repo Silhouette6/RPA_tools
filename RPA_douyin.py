@@ -1,591 +1,173 @@
 import re
-from playwright.sync_api import sync_playwright
-from pathlib import Path
 import time
-import json
-from datetime import datetime
-from urllib3.util import url
-from config import Config_Douyin
+from pathlib import Path
 from typing import Optional
+from base_rpa import BaseRPA
+from config import Config_Douyin
+from playwright.sync_api import Page, Locator
 
-"""
-抖音RPA，基于层级结构提取内容
-TODO
-解析两个不同的前端工程...
-www.douyin.com
-www.iesdouyin.com
-"""
+class DouyinRPA(BaseRPA):
+    def __init__(self, config: Config_Douyin):
+        super().__init__(config, "抖音")
 
-def convent_json(code: int, title: str, url_long: str, content: str, final_media_url: str, publish_time: str, web_name: str, likes: str, comments: str, shares: str, author: str, fans: str):
-    def parse_publish_time(text: str) -> datetime | None:
-        """
-        将形如：
-        - '发布时间：2025-11-06 20:27:40'
-        - '发布时间：2025-12-17 15:30'
-        的字符串解析为 datetime 对象
-
-        解析失败返回 None
-        """
-        if not text:
-            return text
-
-        # 去掉前缀
-        text = text.strip()
-        if "：" in text:
-            text = text.split("：", 1)[1].strip()
-
-        # 尝试多种时间格式
-        formats = [
-            "%Y-%m-%d %H:%M:%S",
-            "%Y-%m-%d %H:%M",
-        ]
-
-        for fmt in formats:
-            try:
-                return str(datetime.strptime(text, fmt))
-            except ValueError:
-                continue
-
-        return text
-
-    def media_type(url: str) -> str:
-        """
-        根据URL判断媒体类型
-        """
-        try:
-            if "video" in url:
-                return "video"
-            elif "image" in url:
-                return "image"
-            elif "screenshot" in url:
-                return "screenshot"
-            else:
-                return "unknown"
-        except Exception:
-            return "unknown"
-
-    def convert_counts(text: str) -> int | None:
-        """
-        将字符串形式的数量转换为整数
-        解析失败返回 None
-        """
-        if not text:
-            return None
-
-        text = text.strip()
-
-        try:
-            if "千" in text:
-                num = re.findall(r"[\d.]+", text)
-                if not num:
-                    return None
-                return int(float(num[0]) * 1000)
-
-            elif "万" in text:
-                num = re.findall(r"[\d.]+", text)
-                if not num:
-                    return None
-                return int(float(num[0]) * 10000)
-
-            else:
-                # 纯数字情况
-                num = re.findall(r"\d+", text)
-                if not num:
-                    return None
-                return int(num[0])
-
-        except Exception:
-            return None
-
-
-    if code == 200:
-        publish_time = parse_publish_time(publish_time)
-        likes = convert_counts(likes)
-        comments = convert_counts(comments)
-        shares = convert_counts(shares)
-        fans = convert_counts(fans)
-        
-        result = json.dumps({
-            "code": code,
-            "message": "success",
-            "data": {
-                "title": title,
-                "url": url_long,
-                "content": content,
-                "media_type": media_type(final_media_url),  # 区分媒体类型
-                "publish_time": publish_time,
-                "web_name": web_name,
-                "praise_count": likes,
-                "forward_count": shares,  # 抖音无转发数则设为null
-                "visit_count": None,
-                "reply_count": comments,
-                "author": author,
-                "author_nickname": None,  # 未获取则设为null
-                "author_fans_count": fans,
-                "author_statuses_count": None,
-                "ip_region": None,
-                "user_id": None,  # 复用author
-                "author_avatar_url": None,
-                "media_urls": final_media_url,  # 无图片则设为空列表
-            }
-            }, ensure_ascii=False)
-
-    if code == 404:
-        result = json.dumps({
-            "code": 404,
-            "message": "PAGE_NOT_FOUND: 作品已下架",
-            "data": {
-                "title": None,
-                "url": url_long,
-                "content": None,
-                "media_type": None,
-                "publish_time": None,
-                "web_name": "抖音",
-                "praise_count": None,
-                "forward_count": None,
-                "visit_count": None,
-                "reply_count": None,
-                "author": None,
-                "author_nickname": None,
-                "author_fans_count": None,
-                "author_statuses_count": None,
-                "ip_region": None,
-                "user_id": None,
-                "author_avatar_url": None,
-                "img_urls": None,
-                "video_urls": None,
-            }
-        }, ensure_ascii=False)
-
-    if code == 502:
-        result = json.dumps({
-            "code": 502,
-            "message": "ERROR: 抓取数据失败",
-            "data": {
-                "title": None,
-                "url": url_long,
-                "content": None,
-                "media_type": None,
-                "publish_time": None,
-                "web_name": "抖音",
-                "praise_count": None,
-                "forward_count": None,
-                "visit_count": None,
-                "reply_count": None,
-                "author": None,
-                "author_nickname": None,
-                "author_fans_count": None,
-                "author_statuses_count": None,
-                "ip_region": None,
-                "user_id": None,
-                "author_avatar_url": None,
-                "img_urls": None,
-                "video_urls": None,
-            }
-        }, ensure_ascii=False)
-    
-    if code == 400:
-        result = json.dumps({
-            "code": 400,
-            "message": "ERROR: 不支持的链接",
-            "data": {
-                "title": None,
-                "url": None,
-                "content": None,
-                "media_type": None,
-                "publish_time": None,
-                "web_name": "抖音",
-                "praise_count": None,
-                "forward_count": None,
-                "visit_count": None,
-                "reply_count": None,
-                "author": None,
-                "author_nickname": None,
-                "author_fans_count": None,
-                "author_statuses_count": None,
-                "ip_region": None,
-                "user_id": None,
-                "author_avatar_url": None,
-                "img_urls": None,
-                "video_urls": None,
-            }
-        }, ensure_ascii=False)
-
-    return result
-
-def safe_filename(name, max_len=100):
-    """
-    文件名合法性审查
-    """
-    name = re.sub(r'[\\/:*?"<>|]', "_", name)
-    name = name.strip()
-    if not name:
-        name = "unnamed"
-    return name[:max_len]
-
-def close_login_popup(close_btn):
-    start_time = time.time()
-    try:
-        if close_btn.count() > 0 and close_btn.is_visible():
-            close_btn.click(timeout=0)
-            print("INFO: login popup closed")
-            end_time = time.time()
-            print(f"close login popup cost time: {end_time - start_time}")
-    except:
-        end_time = time.time()
-        print(f"close login popup cost time: {end_time - start_time}")
-        pass
-
-def download(page, save_dir, title, author, close_btn ,locator_video = None, download_img: bool = True):
-    
-    if locator_video:
-        # 路径保护与文件名合法性处理
-        save_path = f"{save_dir}/{title}-{author}.mp4"
-        path_obj = Path(save_path)
-        directory = path_obj.parent
-        # 对文件名（不含后缀）进行合法性审查并重新拼接
-        safe_name = f"{safe_filename(path_obj.stem)}{path_obj.suffix}"
-        safe_save_path = str(directory / safe_name)
-        close_login_popup(close_btn)
-        video_url = locator_video.get_attribute("src")  
-        
-        # 确保目录存在（路径保护）
-        directory.mkdir(parents=True, exist_ok=True)
-
-        if download_img and video_url:
-            response = page.request.get(video_url)
-            with open(safe_save_path, "wb") as f:
-                f.write(response.body())
-        return video_url
-    else:
-        # ===== 兜底策略：截屏 （处理note）=====
-        
-        # 路径保护与文件名合法性处理
-        save_path = f"{save_dir}/{author}.jpg"
-        path_obj = Path(save_path)
-        directory = path_obj.parent
-        # 对文件名（不含后缀）进行合法性审查并重新拼接
-        safe_name = f"{safe_filename(path_obj.stem)}{path_obj.suffix}"
-        safe_save_path = str(directory / safe_name)
-        print(f"解析为note，采用截屏策略保存至 {safe_save_path}")
-        
-        close_login_popup(close_btn)
-        time.sleep(0.3)
-        page.screenshot(path=safe_save_path)
-        return "screenshot"
-
-def poll_until_ready(
-    page,
-    close_btn,
-    locators,
-    wait_list,
-    timeout=12,
-    interval=0.5):
-    """
-    :param page: Playwright Page 对象
-    :param locators: dict[str, Locator]，所有元素定位器
-    :param wait_list: list[str]，必须就绪的键名列表
-    :param timeout: 总超时（秒）
-    :param interval: 轮询间隔
-    """
-    start = time.time()
-    not_ready = None
-
-    while time.time() - start < timeout:
-        # print("tring")
-        # 1️⃣ 如果 close 按钮出现，立刻点掉
-        close_login_popup(close_btn)
-        
-        # 2️⃣ 检查特殊页面状态
-        if page.get_by_text("你要观看的图文不存在").count() > 0:
-            print("Detected: Content not found (404)")
+    def _check_error_states(self, page: Page) -> Optional[str]:
+        if page.get_by_text("你要观看的图文不存在").count() > 0 or page.get_by_text("视频不存在").count() > 0:
             return "PAGE_NOT_FOUND"
+        return None
 
-        # 3️⃣ 判断正文是否就绪
-        all_ready = True
-        for key in wait_list:
-            loc = locators[key]
-            if loc.count() == 0:
-                not_ready = key
-                all_ready = False
-                break
-
-        if all_ready:
-            print("content ready")
-            return "ALL_READY"
-
-        time.sleep(interval)
-
-    if not_ready:
-        print(f"not ready locator: {not_ready}")
-    raise TimeoutError("page not ready within timeout")
-
-def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video = False, user_data_dir: Optional[str] = None, headless: bool = False):
-
-    with sync_playwright() as p:
-        if user_data_dir is None:
-            user_data_dir = str(Path(__file__).parent / "chrome-profile")
-        context = p.chromium.launch_persistent_context(
-            user_data_dir=user_data_dir,
-            channel="chrome",
-            headless=headless,
-        )
-        try:
-            page = context.new_page()
-
-            print(f"Opening {url} ...")
-            page.goto(url, wait_until="domcontentloaded")
-            print(page.url)
-
-            result = convent_json(
-                code=400,
-                title=None,
-                url_long=page.url,
-                content=None,
-                final_media_url=None,
-                publish_time=None,
-                web_name="抖音",
-                likes=None,
-                comments=None,
-                shares=None,
-                author=None,
-                fans=None
-            )
-
-            if "douyin.com/video" in page.url:
-                video_xpaths = xpaths["video_xpaths"]
-                video_wait_list = wait_list["video_wait_list"]
-
-                close_btn = page.locator(video_xpaths["video_close_btn"])
-                locators = {k: page.locator(v) for k, v in video_xpaths.items()}
-
-                status = poll_until_ready(page=page, close_btn=close_btn, locators=locators, wait_list=video_wait_list)
+    def _download(self, page: Page, title: str, author: str, download_media: bool, locator_video: Optional[Locator], close_btn_selector: str) -> str:
+        if locator_video:
+            save_path = Path(self.save_dir) / f"{self._safe_filename(title or 'unnamed')}-{self._safe_filename(author or 'unnamed')}.mp4"
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+            self._close_login_popup(page, close_btn_selector)
+            
+            video_url = None
+            try:
+                # 优先通过浏览器性能记录(Performance API)查找包含 mime_type=video_mp4 的网络请求
+                # 这种方式可以捕获到在此函数调用前已经发生的网络请求
+                video_url = page.evaluate("""
+                    () => {
+                        const entries = performance.getEntriesByType('resource');
+                        const videoEntry = entries.find(e => e.name.includes('mime_type=video_mp4'));
+                        return videoEntry ? videoEntry.name : null;
+                    }
+                """)
                 
-                if status == "ALL_READY":
-                    def safe_get_text(key):
-                        """
-                        安全获取元素文本，处理可能的异常
-                        """
+                # 如果性能记录中没有，尝试监听后续可能发生的请求（如自动播放或触发加载）
+                if not video_url:
+                    try:
+                        with page.expect_response(lambda res: "mime_type=video_mp4" in res.url, timeout=3000) as response_info:
+                            video_url = response_info.value.url
+                    except:
+                        pass
+            except Exception as e:
+                print(f"Error intercepting video URL: {e}")
 
-                        start_time = time.time()
-                        try:
-                            r = locators[key].first.inner_text(timeout=1000)
-                            
-                            if time.time() - start_time > 0.5:
-                                print(f"warning: {key} 耗时 {time.time() - start_time} 秒")
-                            return r
-                        except Exception:
-                            if time.time() - start_time > 0.5:
-                                print(f"warning: {key} 耗时 {time.time() - start_time} 秒，且进入了异常处理（是否因为该元素不存在？）")
-                            return None
+            try:
+                if download_media and video_url and video_url.startswith("http"):
+                    # 使用 page.request.get 确保使用当前页面的 cookies 和 context
+                    response = page.request.get(video_url)
+                    if response.ok:
+                        with open(save_path, "wb") as f:
+                            f.write(response.body())
+                    else:
+                        print(f"Download failed with status: {response.status}")
+                return video_url or None
+            except Exception as e:
+                print(f"Error during video download: {e}")
+                return None
+        else:
+            save_path = Path(self.save_dir) / f"{self._safe_filename(author or 'unnamed')}.jpg"
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+            self._close_login_popup(page, close_btn_selector)
+            time.sleep(0.3)
+            page.screenshot(path=str(save_path))
+            return "screenshot"
 
-                    # 统一提取所有文本信息
-                    title = safe_get_text("video_title")
-                    author = safe_get_text("video_author")
-                    like  = safe_get_text("video_likes")
-                    comments = safe_get_text("video_comments")
-                    shares = safe_get_text("video_shares")
-                    fans = safe_get_text("video_fans")
-                    publish_time = safe_get_text("video_publish_time")
-                    url_long = page.url
-                    final_video_url = download(
-                        page=page,
-                        save_dir=save_dir,
-                        title=title,
-                        author=author,
-                        close_btn=close_btn,
-                        locator_video=locators["video_video"],
-                        download_img=download_video
-                    )
+    def extract_info(self, page: Page, url: str, download_media: bool) -> str:
+        if "douyin.com/video" in page.url:
+            return self._extract_video(page, download_media)
+        elif "douyin.com/note" in page.url:
+            return self._extract_note(page, download_media)
+        else:
+            return self._convent_json(400)
 
-                    result = convent_json(
-                        code=200,
-                        title=title,
-                        url_long=url_long,
-                        content=None,
-                        final_media_url=final_video_url,
-                        publish_time=publish_time,
-                        web_name="抖音",
-                        likes=like,
-                        comments=comments,
-                        shares=shares,
-                        author=author,
-                        fans=fans
-                    )
+    def _extract_video(self, page: Page, download_media: bool) -> str:
+        v_xpaths = self.xpaths["video_xpaths"]
+        v_wait_list = self.config.wait_list["video_wait_list"]
+        locators = {k: page.locator(v) for k, v in v_xpaths.items()}
 
-                
-                elif status == "PAGE_NOT_FOUND":
-                    result = convent_json(
-                        code=404,
-                        title=None,
-                        url_long=page.url,
-                        content=None,
-                        final_media_url=None,
-                        publish_time=None,
-                        web_name="抖音",
-                        likes=None,
-                        comments=None,
-                        shares=None,
-                        author=None,
-                        fans=None
-                    )
-                    return result
+        status = self._poll_until_ready(page, locators, v_wait_list, v_xpaths["video_close_btn"])
+        if status == "ALL_READY":
+            title = self._safe_get_text(locators["video_title"], "video_title")
+            author = self._safe_get_text(locators["video_author"], "video_author")
+            like  = self._safe_get_text(locators["video_likes"], "video_likes")
+            comments = self._safe_get_text(locators["video_comments"], "video_comments")
+            shares = self._safe_get_text(locators["video_shares"], "video_shares")
+            fans = self._safe_get_text(locators["video_fans"], "video_fans")
+            publish_time = self._safe_get_text(locators["video_publish_time"], "video_publish_time")
+            url_long = page.url
 
-                else:
-                    result = convent_json(
-                        code=502,
-                        title=None,
-                        url_long=page.url,
-                        content=None,
-                        final_media_url=None,
-                        publish_time=None,
-                        web_name="抖音",
-                        likes=None,
-                        comments=None,
-                        shares=None,
-                        author=None,
-                        fans=None
-                    )
-                    print("未找到对应元素，请检查路径或页面加载状态。")
-                    return result
-                            
-            if "douyin.com/note" in page.url:
-                note_xpaths = xpaths["note_xpaths"]
-                note_wait_list = wait_list["note_wait_list"]
+            video_url = self._download(page, title, author, download_media, locators["video_video"], v_xpaths["video_close_btn"])
 
-                close_btn = page.locator(note_xpaths["note_close_btn"])
-                locators = {k: page.locator(v) for k, v in note_xpaths.items()}
+            data = {
+                "title": title,
+                "author": author,
+                "content": None,
+                "likes": like,
+                "comments": comments,
+                "shares": shares,
+                "fans": fans,
+                "publish_time": publish_time,
+                "url": url_long,
+                "media_url": video_url
+            }
+            return self._convent_json(200, data)
+        
+        if status == "PAGE_NOT_FOUND":
+            data = {"url": page.url}
+            return self._convent_json(404, data=data, message="PAGE_NOT_FOUND: 作品已下架")
 
-                status = poll_until_ready(page=page, close_btn=close_btn, locators=locators, wait_list=note_wait_list)
-                
-                if status == "ALL_READY":
-                    def safe_get_text(key):
-                        """
-                        安全获取元素文本，处理可能的异常
-                        """
+        else:
+            data = {"url": page.url}
+            return self._convent_json(502, data=data, message="ERROR: 抓取数据失败")
 
-                        start_time = time.time()
-                        try:
-                            r = locators[key].first.inner_text(timeout=1000)
+    def _extract_note(self, page: Page, download_media: bool) -> str:
+        n_xpaths = self.xpaths["note_xpaths"]
+        n_wait_list = self.config.wait_list["note_wait_list"]
+        locators = {k: page.locator(v) for k, v in n_xpaths.items()}
 
-                            if r and key == "note_title":
-                                r = r.replace("\n", "").strip()
-                                # 去掉发布时间及之后的内容
-                                r = re.split(r"发布时间：", r)[0].strip()
-                            
-                            if r and key == "note_likes":
-                                tmp = r.split("\n")
-                                r = tmp[0].strip() # 点赞数为第一个元素
-                            if r and key == "note_comments":
-                                tmp = r.split("\n")
-                                r = tmp[1].strip() # 评论数为第二个元素
-                            if r and key == "note_favourites":
-                                tmp = r.split("\n")
-                                r = tmp[2].strip() # 收藏数为第三个元素
-                            if r and key == "note_shares":
-                                tmp = r.split("\n")
-                                r = tmp[3].strip() # 分享数为第四个元素
+        status = self._poll_until_ready(page, locators, n_wait_list, n_xpaths["note_close_btn"])
+        if status == "ALL_READY":
 
+            title_raw = self._safe_get_text(locators["note_title"], "note_title")
+            title = re.split(r"发布时间：", title_raw.replace("\n", "").strip())[0].strip() if title_raw else None
+            author = self._safe_get_text(locators["note_author"], "note_author")
+            # Douyin note stats are often combined in one element, need custom parsing if necessary
+            # but original code had some specific logic:
 
+            # self._close_login_popup(page, n_xpaths["note_close_btn"])
+            likes_comments_favorites_shares = locators["note_likes"].first.inner_text(timeout=1000)
+            likes, comments, favorites, shares = None, None, None, None
+            if likes_comments_favorites_shares:
+                parts = likes_comments_favorites_shares.split("\n")
+                if len(parts) >= 1: likes = parts[0].strip()
+                if len(parts) >= 2: comments = parts[1].strip()
+                if len(parts) >= 3: favorites = parts[2].strip()
+                if len(parts) >= 4: shares = parts[3].strip()
 
-                            if time.time() - start_time > 0.5:
-                                print(f"warning: {key} 耗时 {time.time() - start_time} 秒")
-                            return r
-                        except Exception:
-                            if time.time() - start_time > 0.5:
-                                print(f"warning: {key} 耗时 {time.time() - start_time} 秒，且进入了异常处理（是否因为该元素不存在？）")
-                            return None
+            media_url = self._download(page, title, author, download_media, None, n_xpaths["note_close_btn"])
 
-                    # 统一提取所有文本信息
-                    title = safe_get_text("note_title")
-                    author = safe_get_text("note_author")
-                    likes = safe_get_text("note_likes")
-                    comments = safe_get_text("note_comments")
-                    favorites = safe_get_text("note_favourites")
-                    shares = safe_get_text("note_shares")
-                    fans = safe_get_text("note_fans")
-                    publish_time = safe_get_text("note_publish_time")
+            data = {
+                "title": None,
+                "author": author,
+                "content": title, # Use title as content for notes
+                "likes": likes,
+                "comments": comments,
+                "shares": shares,
+                "fans": self._safe_get_text(locators["note_fans"], "note_fans"),
+                "publish_time": self._safe_get_text(locators["note_publish_time"], "note_publish_time"),
+                "url": page.url,
+                "media_url": media_url
+            }
+            return self._convent_json(200, data)
+        
+        if status == "PAGE_NOT_FOUND":
+            data = {"url": page.url}
+            return self._convent_json(404, data=data, message="PAGE_NOT_FOUND: 作品已下架")
 
-                    url_long = page.url
-                    final_media_url = download(
-                        page=page,
-                        save_dir=save_dir,
-                        title=title,
-                        author=author,
-                        close_btn=close_btn,
-                        locator_video=None,
-                        download_img=download_video
-                    )
+        else:
+            data = {"url": page.url}
+            return self._convent_json(502, data=data, message="ERROR: 抓取数据失败")
 
-                    result = convent_json(
-                        code=200,
-                        title=None,
-                        url_long=url_long,
-                        content=title,
-                        final_media_url=final_media_url,
-                        publish_time=publish_time,
-                        web_name="抖音",
-                        likes=likes,
-                        comments=comments,
-                        shares=shares,
-                        author=author,
-                        fans=fans
-                    )
-
-                elif status == "PAGE_NOT_FOUND":
-                    result = convent_json(
-                        code=404,
-                        title=None,
-                        url_long=page.url,
-                        content=None,
-                        final_media_url=None,
-                        publish_time=None,
-                        web_name="抖音",
-                        likes=None,
-                        comments=None,
-                        shares=None,
-                        author=None,
-                        fans=None
-                    )
-                    return result
-
-                else:
-                    result = convent_json(
-                        code=502,
-                        title=None,
-                        url_long=page.url,
-                        content=None,
-                        final_media_url=None,
-                        publish_time=None,
-                        web_name="抖音",
-                        likes=None,
-                        comments=None,
-                        shares=None,
-                        author=None,
-                        fans=None
-                    )
-                    print("未找到对应元素，请检查路径或页面加载状态。")
-                    return result
-                
-            return result
-        finally:
-            context.close()
-
+def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video=False, user_data_dir: Optional[str] = None, headless: bool = False):
+    config = Config_Douyin()
+    rpa = DouyinRPA(config)
+    return rpa.run(url, download_media=download_video, user_data_dir=user_data_dir, headless=headless)
 
 if __name__ == "__main__":
-    # https://v.douyin.com/CpcD7JUpYEk/ 已下架
-    # https://v.douyin.com/WogUSRW-pzM/ 短链接
-    # https://www.iesdouyin.com/share/video/7568635678734328811 长link
-
-    
-    url = "https://www.douyin.com/note/7532822704576220457"
-
-    config = Config_Douyin() 
-    # XPath路径
-    xpaths = config.xpaths
-    # 创建等待列表，等待元素可见
-    wait_list = config.wait_list
-    save_dir = config.save_dir
-
-    result = get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video=False, headless=False)
+    url = "https://v.douyin.com/CpcD7JUpYEk/"
+    config = Config_Douyin()
+    rpa = DouyinRPA(config)
+    result = rpa.run(url, download_media=False, headless=False)
     print(result)

@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -75,6 +76,7 @@ async def health() -> Dict[str, Any]:
 async def xhs(req: XhsRequest) -> Dict[str, Any]:
     start = time.perf_counter()
     profile_dir = await _profile_pool.get()
+    status_code = 200
     try:
         cfg = Config_Xhs()
         result_text = await asyncio.to_thread(
@@ -87,8 +89,11 @@ async def xhs(req: XhsRequest) -> Dict[str, Any]:
             profile_dir,
             req.headless,
         )
-        return _safe_parse_json(result_text)
+        resp = _safe_parse_json(result_text)
+        status_code = resp.get("code", 200)
+        return resp
     except Exception as e:
+        status_code = 500
         return {
             "code": 500,
             "message": "internal_error",
@@ -96,13 +101,15 @@ async def xhs(req: XhsRequest) -> Dict[str, Any]:
         }
     finally:
         cost = time.perf_counter() - start
-        print(f"[xhs] cost={cost:.2f}s url={req.url} worker={profile_dir}")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{now}] [xhs] code={status_code} cost={cost:.2f}s url={req.url} worker={profile_dir}")
         _profile_pool.put_nowait(profile_dir)
 
 @app.post("/douyin")
 async def douyin(req: DouyinRequest) -> Dict[str, Any]:
     start = time.perf_counter()
     profile_dir = await _profile_pool.get()
+    status_code = 200
     try:
         cfg = Config_Douyin()
         result_text = await asyncio.to_thread(
@@ -115,8 +122,11 @@ async def douyin(req: DouyinRequest) -> Dict[str, Any]:
             profile_dir,
             req.headless,
         )
-        return _safe_parse_json(result_text)
+        resp = _safe_parse_json(result_text)
+        status_code = resp.get("code", 200)
+        return resp
     except Exception as e:
+        status_code = 500
         return {
             "code": 500,
             "message": "internal_error",
@@ -124,13 +134,15 @@ async def douyin(req: DouyinRequest) -> Dict[str, Any]:
         }
     finally:
         cost = time.perf_counter() - start
-        print(f"[douyin] cost={cost:.2f}s url={req.url} worker={profile_dir}")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{now}] [douyin] code={status_code} cost={cost:.2f}s url={req.url} worker={profile_dir}")
         _profile_pool.put_nowait(profile_dir)
 
 @app.post("/toutiao")
 async def toutiao(req: ToutiaoRequest) -> Dict[str, Any]:
     start = time.perf_counter()
     profile_dir = await _profile_pool.get()
+    status_code = 200
     try:
         cfg = Config_Toutiao()
         result_text = await asyncio.to_thread(
@@ -143,8 +155,11 @@ async def toutiao(req: ToutiaoRequest) -> Dict[str, Any]:
             profile_dir,
             req.headless,
         )
-        return _safe_parse_json(result_text)
+        resp = _safe_parse_json(result_text)
+        status_code = resp.get("code", 200)
+        return resp
     except Exception as e:
+        status_code = 500
         return {
             "code": 500,
             "message": "internal_error",
@@ -152,7 +167,8 @@ async def toutiao(req: ToutiaoRequest) -> Dict[str, Any]:
         }
     finally:
         cost = time.perf_counter() - start
-        print(f"[toutiao] cost={cost:.2f}s url={req.url} worker={profile_dir}")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{now}] [toutiao] code={status_code} cost={cost:.2f}s url={req.url} worker={profile_dir}")
         _profile_pool.put_nowait(profile_dir)
 
 if __name__ == "__main__":

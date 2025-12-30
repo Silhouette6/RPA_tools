@@ -26,7 +26,7 @@ class Config_Douyin:
         }
         self.wait_list = {
             "video_wait_list": ["video_author", "video_likes", "video_comments", "video_shares", "video_fans", "video_publish_time"],
-            "note_wait_list": ["note_title"],
+            "note_wait_list": ["note_title", "note_likes"],
         }
         self.save_dir = "data/douyin"
 

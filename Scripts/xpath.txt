@@ -1,1 +1,2 @@
-//*[@id="douyin-right-container"]/div[2]/main/div[1]/div[2]/div/div[2]
+//*[@id="douyin-right-container"]/div[2]/div/div/div[1]/div[2]/div/div[1]/xg-video-container/video/source[1]
+

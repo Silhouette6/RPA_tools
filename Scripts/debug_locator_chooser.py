@@ -10,7 +10,7 @@ with sync_playwright() as p:
         headless=False,
     )
     page = context.new_page()
-    page.goto("https://www.douyin.com/note/7580293722521791217")
+    page.goto("https://www.douyin.com/video/7565807326886055205")
     
     xpath_file = Path(__file__).parent / "xpath.txt"
     print(f"Ready. Press 'x' to read xpath from {xpath_file.name}, or other key to exit.")
