@@ -66,11 +66,20 @@ class Config_Toutiao:
                 "video_views": '//span[@class="views-count"]',
                 "video_likes": '//ul/li/button/span[contains(@class, "like-count")]',
                 "video_video": '//ul/li//video[@mediatype="video"]'
+            },
+            "a_xpaths" : {
+                "a_title": '//*[local-name()="h1"]',
+                "a_author": '//a[@class="user-name"]',
+                "a_article": '//article[contains(@class, "syl-article-base")]',
+                "a_publish_time": '//div[@class="article-meta"]/span[1]',
+                "a_likes": '//div[@class="detail-like"]/span',
+                "a_comments": '//div[@class="detail-interaction-comment"]/span',
             }
         }
         self.wait_list = {
             "w_wait_list" : ["w_author", "w_content", "w_publish_time", "w_likes"],
-            "video_wait_list" : ["video_author", "video_content", "video_publish_time", "video_views", "video_likes"]
+            "video_wait_list" : ["video_author", "video_content", "video_publish_time", "video_views", "video_likes"],
+            "a_wait_list" : ["a_article", "a_author"],
             }
 
         self.save_dir = "data/toutiao"

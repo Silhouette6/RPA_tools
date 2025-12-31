@@ -8,7 +8,7 @@ BASE_URL_REMOTE = "http://192.168.30.137:8000"
 def test_xhs(BASE_URL):
     print("\n--- Testing 小红书 ---", BASE_URL)
     payload = {
-        "url": "https://www.xiaohongshu.com/discovery/item/6911a4c30000000004005418",
+        "url": "http://xhslink.com/o/3C2UqEN1jIz",
         "download_img": False,
         "headless": False 
     }
@@ -36,7 +36,7 @@ def test_douyin(BASE_URL):
 def test_toutiao(BASE_URL):
     print("\n--- Testing 今日头条 ---", BASE_URL)
     payload = {
-        "url": "https://www.toutiao.com/video/7571303297971060770/#ocr",
+        "url": "https://www.toutiao.com/article/7523116763127562815/#ocr",
         "download_video": False,
         "headless": False
     }
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     # test_douyin(BASE_URL_LOCAL)
     # test_douyin(BASE_URL_REMOTE)
     test_toutiao(BASE_URL_LOCAL)
-    test_toutiao(BASE_URL_REMOTE)
+    # test_toutiao(BASE_URL_REMOTE)
     
     '''
     for i in range(5):

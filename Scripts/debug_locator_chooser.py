@@ -10,7 +10,7 @@ with sync_playwright() as p:
         headless=False,
     )
     page = context.new_page()
-    page.goto("https://www.douyin.com/video/7565807326886055205")
+    page.goto("https://m.toutiao.com/article/7530199854962786851/?app=news_article&category_new=__search__&module_name=Android_tt_others&share_did=MS4wLjACAAAAxMTOW9OFmwO1BIKhPg2st-nicYPfGJux1scZxlFuIZNwhHscB0hTHhBTYjVZYwN-&share_uid=MS4wLjABAAAAxMTOW9OFmwO1BIKhPg2st-nicYPfGJux1scZxlFuIZNwhHscB0hTHhBTYjVZYwN-&timestamp=1767146425&tt_from=wechat&upstream_biz=Android_wechat&utm_campaign=client_share&utm_medium=toutiao_android&utm_source=wechat&share_token=a89b783a-d49b-4d47-9ea9-f0db9c0a5ad5")
     
     xpath_file = Path(__file__).parent / "xpath.txt"
     print(f"Ready. Press 'x' to read xpath from {xpath_file.name}, or other key to exit.")

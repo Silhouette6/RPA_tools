@@ -95,13 +95,22 @@ class BaseRPA:
         print(f"[Warining]:无法解析时间格式: {text}")
         return None
 
-    def _convert_counts(self, text: str) -> Optional[int]:
+    def _convert_counts(self, text: Any) -> Optional[int]:
         """
         将字符串形式的数量（如 "1.2万", "3千"）转换为整数。
         """
+        if text is None:
+            return None
+        if isinstance(text, (int, float)):
+            return int(text)
+        
+        text = str(text).strip()
         if not text:
             return None
-        text = text.strip()
+        
+        if not any(ch.isdigit() for ch in text):
+            # 处理非数字字符串，默认返 0
+            return 0
         try:
             if "千" in text:
                 num = re.findall(r"[\d.]+", text)
