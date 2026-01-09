@@ -103,7 +103,7 @@ class ToutiaoRPA(BaseRPA):
                 "shares": None,
                 "fans": None
             }
-            return self._convent_json(200, data)
+            return self._convent_json(200, data, message="SUCCESS: 微头条数据提取成功")
         if status == "PAGE_NOT_FOUND":
             return self._convent_json(404, data={"url": page.url}, message="PAGE_NOT_FOUND: 作品已下架")
         else:
@@ -131,7 +131,7 @@ class ToutiaoRPA(BaseRPA):
                 "shares": None,
                 "fans": None
             }
-            return self._convent_json(200, data)
+            return self._convent_json(200, data, message="SUCCESS: 抖音数据提取成功")
         
         if status == "PAGE_NOT_FOUND":
             data = {"url": page.url}
@@ -163,19 +163,19 @@ class ToutiaoRPA(BaseRPA):
                 "shares": None,
                 "fans": None
             }
-            return self._convent_json(200, data)
+            return self._convent_json(200, data, message="SUCCESS: 微头条数据提取成功")
         if status == "PAGE_NOT_FOUND":
             return self._convent_json(404, data={"url": page.url}, message="PAGE_NOT_FOUND: 作品已下架")
         else:
             return self._convent_json(502, data={"url": page.url}, message="ERROR: 抓取数据失败")
 
-def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video=False, user_data_dir: Optional[str] = None, headless: bool = False):
+def get_toutiao_info(url, xpaths, wait_list, save_dir, download_video=False, user_data_dir: Optional[str] = None, headless: bool = False, user_agent: Optional[str] = None, viewport: Optional[Dict[str, int]] = None, timezone_id: Optional[str] = None):
     config = Config_Toutiao()
     rpa = ToutiaoRPA(config)
-    return rpa.run(url, download_media=download_video, user_data_dir=user_data_dir, headless=headless)
+    return rpa.run(url, download_media=download_video, user_data_dir=user_data_dir, headless=headless, user_agent=user_agent, viewport=viewport, timezone_id=timezone_id)
 
 if __name__ == "__main__":
-    url = "https://m.toutiao.com/article/7548372039610991104/?app=news_article&category_new=__search__&module_name=Android_tt_others&share_did=MS4wLjACAAAAxMTOW9OFmwO1BIKhPg2st-nicYPfGJux1scZxlFuIZNwhHscB0hTHhBTYjVZYwN-&share_uid=MS4wLjABAAAAxMTOW9OFmwO1BIKhPg2st-nicYPfGJux1scZxlFuIZNwhHscB0hTHhBTYjVZYwN-&timestamp=1767146477&tt_from=wechat&upstream_biz=Android_wechat&utm_campaign=client_share&utm_medium=toutiao_android&utm_source=wechat&share_token=8b9cc820-b92a-48ba-89ce-20fe91b82938"
+    url = "https://m.toutiao.com/article/7555347911730676233/?app=news_article&category_new=__search__&module_name=Android_tt_others&share_did=MS4wLjACAAAAxMTOW9OFmwO1BIKhPg2st-nicYPfGJux1scZxlFuIZNwhHscB0hTHhBTYjVZYwN-&share_uid=MS4wLjABAAAAxMTOW9OFmwO1BIKhPg2st-nicYPfGJux1scZxlFuIZNwhHscB0hTHhBTYjVZYwN-&timestamp=1767146449&tt_from=wechat&upstream_biz=Android_wechat&utm_campaign=client_share&utm_medium=toutiao_android&utm_source=wechat&share_token=ca74277c-e0a9-488f-9ba5-7ab68681a519"
     config = Config_Toutiao()
     rpa = ToutiaoRPA(config)
     result = rpa.run(url, download_media=False, headless=False)

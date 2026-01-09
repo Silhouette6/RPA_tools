@@ -1,7 +1,7 @@
 import re
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 from base_rpa import BaseRPA
 from config import Config_Douyin
 from playwright.sync_api import Page, Locator
@@ -102,7 +102,7 @@ class DouyinRPA(BaseRPA):
                 "url": url_long,
                 "media_url": video_url
             }
-            return self._convent_json(200, data)
+            return self._convent_json(200, data, message="SUCCESS: 抖音数据提取成功")
         
         if status == "PAGE_NOT_FOUND":
             data = {"url": page.url}
@@ -150,7 +150,7 @@ class DouyinRPA(BaseRPA):
                 "url": page.url,
                 "media_url": media_url
             }
-            return self._convent_json(200, data)
+            return self._convent_json(200, data, message="SUCCESS: 抖音数据提取成功")
         
         if status == "PAGE_NOT_FOUND":
             data = {"url": page.url}
@@ -160,10 +160,10 @@ class DouyinRPA(BaseRPA):
             data = {"url": page.url}
             return self._convent_json(502, data=data, message="ERROR: 抓取数据失败")
 
-def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video=False, user_data_dir: Optional[str] = None, headless: bool = False):
+def get_douyin_short_video_info(url, xpaths, wait_list, save_dir, download_video=False, user_data_dir: Optional[str] = None, headless: bool = False, user_agent: Optional[str] = None, viewport: Optional[Dict[str, int]] = None, timezone_id: Optional[str] = None):
     config = Config_Douyin()
     rpa = DouyinRPA(config)
-    return rpa.run(url, download_media=download_video, user_data_dir=user_data_dir, headless=headless)
+    return rpa.run(url, download_media=download_video, user_data_dir=user_data_dir, headless=headless, user_agent=user_agent, viewport=viewport, timezone_id=timezone_id)
 
 if __name__ == "__main__":
     url = "https://v.douyin.com/CpcD7JUpYEk/"

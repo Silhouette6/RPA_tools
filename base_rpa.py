@@ -260,19 +260,28 @@ class BaseRPA:
                 print(f"warning: {key} 耗时 {time.time() - start_time} 秒，且进入了异常处理（是否因为该元素不存在？）")
             return None
 
-    def _get_browser_context(self, p: Any, user_data_dir: Optional[str], headless: bool) -> BrowserContext:
+    def _get_browser_context(self, p: Any, user_data_dir: Optional[str], headless: bool, user_agent: Optional[str] = None, viewport: Optional[Dict[str, int]] = None, timezone_id: Optional[str] = None) -> BrowserContext:
         """
         启动并获取持久化浏览器上下文（支持缓存和 Chrome 渠道）。
         """
         if user_data_dir is None:
             user_data_dir = str(Path(__file__).parent / "chrome-profile")
-        return p.chromium.launch_persistent_context(
-            user_data_dir=user_data_dir,
-            channel="chrome",
-            headless=headless,
-        )
+        
+        launch_kwargs = {
+            "user_data_dir": user_data_dir,
+            "channel": "chrome",
+            "headless": headless,
+        }
+        if user_agent:
+            launch_kwargs["user_agent"] = user_agent
+        if viewport:
+            launch_kwargs["viewport"] = viewport
+        if timezone_id:
+            launch_kwargs["timezone_id"] = timezone_id
+            
+        return p.chromium.launch_persistent_context(**launch_kwargs)
 
-    def run(self, url: str, download_media: bool = False, user_data_dir: Optional[str] = None, headless: bool = False) -> str:
+    def run(self, url: str, download_media: bool = False, user_data_dir: Optional[str] = None, headless: bool = False, user_agent: Optional[str] = None, viewport: Optional[Dict[str, int]] = None, timezone_id: Optional[str] = None) -> str:
         """
         执行 RPA 任务的主入口。
         
@@ -280,10 +289,13 @@ class BaseRPA:
         :param download_media: 是否下载媒体文件
         :param user_data_dir: 浏览器用户数据目录
         :param headless: 是否使用无头模式
+        :param user_agent: 用户代理字符串
+        :param viewport: 视口大小 {"width": 1920, "height": 1080}
+        :param timezone_id: 时区 ID，如 "Asia/Shanghai"
         :return: JSON 结果字符串
         """
         with sync_playwright() as p:
-            browser_context = self._get_browser_context(p, user_data_dir, headless)
+            browser_context = self._get_browser_context(p, user_data_dir, headless, user_agent, viewport, timezone_id)
             try:
                 page = browser_context.new_page()
                 print(f"Opening {url} ...")
