@@ -70,7 +70,7 @@ class DouyinRPA(BaseRPA):
         elif "douyin.com/note" in page.url:
             return self._extract_note(page, download_media)
         else:
-            return self._convent_json(400)
+            return self._convent_json(400, data={"url": page.url}, message="ERROR: 不支持的链接")
 
     def _extract_video(self, page: Page, download_media: bool) -> str:
         v_xpaths = self.xpaths["video_xpaths"]

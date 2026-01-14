@@ -131,7 +131,7 @@ class ToutiaoRPA(BaseRPA):
                 "shares": None,
                 "fans": None
             }
-            return self._convent_json(200, data, message="SUCCESS: 抖音数据提取成功")
+            return self._convent_json(200, data, message="SUCCESS: 头条数据提取成功")
         
         if status == "PAGE_NOT_FOUND":
             data = {"url": page.url}

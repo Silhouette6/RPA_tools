@@ -26,6 +26,8 @@ class XhsRPA(BaseRPA):
             return "PAGE_NOT_FOUND"
         if page.get_by_text("请打开小红书App扫码查看").count() > 0:
             return "MOBILE_LINK"
+        if "com/explore" in page.url:
+            return "MOBILE_LINK"
         if "com/login" in page.url:
             return "REDIRECT_WARNING"
         return None
